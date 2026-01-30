@@ -1,0 +1,61 @@
+'use client';
+
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Menu } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+  SheetClose,
+} from '@/components/ui/sheet';
+import Link from 'next/link';
+import navbarData from '@/database/app-navbar.json';
+import { ModeToggle } from './mode-toggle';
+
+export function AppSidebar() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <div className="md:hidden">
+        <Button variant="outline" size="icon" onClick={() => setOpen(true)}>
+          <Menu className="h-4 w-4" />
+        </Button>
+      </div>
+
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetContent side="right" className="p-4 flex flex-col h-full">
+          <SheetHeader>
+            <div className="flex items-center justify-between w-full">
+              <SheetTitle>Menu</SheetTitle>
+              <SheetClose />
+            </div>
+          </SheetHeader>
+
+          <nav className="mt-6">
+            <ul className="flex flex-col gap-3">
+              {navbarData.map((item: { label: string; href: string }) => (
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className="block w-full rounded-md px-3 py-2 text-base hover:bg-accent"
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <div className="mt-auto pt-4">
+            <ModeToggle />
+          </div>
+        </SheetContent>
+      </Sheet>
+    </>
+  );
+}

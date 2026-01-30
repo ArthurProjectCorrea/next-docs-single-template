@@ -1,0 +1,22 @@
+[
+  {
+    "label": "Showcase",
+    "href": "/showcase"
+  },
+  {
+    "label": "Docs",
+    "href": "/docs"
+  },
+  {
+    "label": "Blog",
+    "href": "/blog"
+  },
+  {
+    "label": "Templates",
+    "href": "/templates"
+  },
+  {
+    "label": "Enterprise",
+    "href": "/enterprise"
+  }
+]
