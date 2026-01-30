@@ -88,7 +88,7 @@ You can adjust the size of the sheet using CSS classes:
 ```tsx showLineNumbers {3}
 <Sheet>
   <SheetTrigger>Open</SheetTrigger>
-  <SheetContent className="w-[400px] sm:w-[540px]">
+  <SheetContent className="w-100 sm:w-135">
     <SheetHeader>
       <SheetTitle>Are you absolutely sure?</SheetTitle>
       <SheetDescription>

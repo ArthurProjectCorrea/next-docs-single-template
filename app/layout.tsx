@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
-import { SidebarProvider } from '@/components/ui/sidebar';
 import TopLoader from '@/components/next-top-loader';
 import AppHeader from '@/components/app-header';
 
@@ -39,9 +38,9 @@ export default function RootLayout({
         >
           <TopLoader />
           <AppHeader />
-          <SidebarProvider>
-            <main className="container mx-auto flex-1">{children}</main>
-          </SidebarProvider>
+          <main className="container mx-auto flex flex-1 min-h-0">
+            {children}
+          </main>
         </ThemeProvider>
       </body>
     </html>

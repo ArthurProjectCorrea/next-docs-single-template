@@ -8,7 +8,7 @@ import { AppSidebar } from './app-sidebar';
 
 export default function AppHeader() {
   return (
-    <header className="p-4 border-b">
+    <header className="p-4 bg-background sticky top-0 z-50 flex w-full items-center border-b">
       <div className="container mx-auto flex items-center justify-between">
         <Link href="/" aria-label="Home">
           <Image

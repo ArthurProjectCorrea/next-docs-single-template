@@ -9,7 +9,7 @@ links:
 
 <ComponentPreview
   name="navigation-menu-demo"
-  className="[&_.preview]:!items-start [&_.preview]:p-4 [&_.preview]:pt-8 md:[&_.preview]:pt-16"
+  className="[&_.preview]:items-start! [&_.preview]:p-4 [&_.preview]:pt-8 md:[&_.preview]:pt-16"
 />
 
 ## Installation
