@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    branches: ['main']
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.9.0'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run semantic-release
+        env:
+          # Use a personal token if provided (recommended when branch protection or fork pushes block the default token)
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN || github.token }}
+        run: npx semantic-release
