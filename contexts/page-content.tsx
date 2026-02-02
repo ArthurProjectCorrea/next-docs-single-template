@@ -1,9 +1,12 @@
 'use client';
 
-import { TOCProvider } from '@/contexts/toc-context';
 import { useEffect } from 'react';
 import type { TOCItem } from '@/types/global';
 
+/**
+ * Wrapper component that syncs TOC data to window for external components
+ * Used by page.tsx to provide TOC to DocToc (which lives in layout)
+ */
 export function PageContent({
   toc,
   children,
@@ -17,5 +20,5 @@ export function PageContent({
     window.dispatchEvent(new CustomEvent('toc-update'));
   }, [toc]);
 
-  return <TOCProvider toc={toc}>{children}</TOCProvider>;
+  return <>{children}</>;
 }

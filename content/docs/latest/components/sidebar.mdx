@@ -1,0 +1,236 @@
+---
+title: Sidebar
+description: Componente de navegação lateral com árvore de páginas
+order: 3.2
+tags: ["sidebar", "navegação", "menu"]
+---
+
+## Uso Básico
+
+```tsx
+import { AppSidebar } from '@/components/doc-sidebar';
+import { source } from '@/lib/source';
+import { sortPageTree } from '@/lib/sidebar-utils';
+import type { PageTreeNode } from '@/types/sidebar';
+
+// No layout.tsx
+const tree = source.getPageTree();
+const sortedTree = {
+  ...tree,
+  children: sortPageTree(tree.children as unknown as PageTreeNode[]),
+};
+
+<AppSidebar tree={sortedTree} />
+```
+
+## Arquitetura
+
+```
+components/doc-sidebar.tsx   # UI (menu, collapsible, links)
+lib/sidebar-utils.ts         # Funções de conversão e ordenação
+types/sidebar.ts             # Interfaces
+```
+
+## Estrutura de Arquivos
+
+### `types/sidebar.ts`
+
+Define as interfaces da árvore:
+
+```tsx
+export interface TreeNode {
+  $id?: string;
+  name?: ReactNode;
+  children?: TreeNode[];
+  url?: string;
+  type?: string;
+  index?: TreeNode;
+}
+
+export interface PageTreeNode {
+  type: 'page' | 'folder';
+  name: string;
+  url?: string;
+  children?: PageTreeNode[];
+  index?: { url: string };
+  $id?: string;
+  $ref?: { file: string };
+}
+
+export interface NavItem {
+  title: string;
+  url?: string;
+  items?: NavItem[];
+  defaultOpen?: boolean;
+  id?: string;
+  group?: string;
+}
+
+export interface SidebarTree {
+  children: TreeNode[];
+}
+```
+
+### `lib/sidebar-utils.ts`
+
+Funções de processamento:
+
+| Função | Descrição |
+|--------|-----------|
+| `convertTreeToNav()` | Converte árvore de páginas para NavItems |
+| `sortPageTree()` | Ordena árvore por `order`, index, alfabético |
+
+## Customizações
+
+### Alterar Ordem de Páginas
+
+Use o frontmatter `order` nos arquivos MDX:
+
+```mdx
+---
+title: Introdução
+order: 1
+---
+
+# Introdução
+```
+
+Páginas com `order` aparecem primeiro, ordenadas numericamente.
+
+### Criar Grupos Visuais
+
+Use o frontmatter `group` para criar labels:
+
+```mdx
+---
+title: Autenticação
+group: API Reference
+order: 5
+---
+```
+
+O grupo aparece como label antes do item no sidebar.
+
+### Expandir Pastas por Padrão
+
+Use `is_open` no `index.mdx` da pasta:
+
+```mdx
+---
+title: Guias
+is_open: true
+---
+```
+
+### Alterar Ícones de Expandir/Colapsar
+
+No componente `doc-sidebar.tsx`:
+
+```tsx
+import { ChevronRight, ChevronDown } from 'lucide-react';
+
+// Localize o CollapsibleTrigger
+<CollapsibleTrigger asChild>
+  <SidebarMenuButton>
+    {item.title}
+    <ChevronRight className="ml-auto group-data-[state=open]/collapsible:hidden" />
+    <ChevronDown className="ml-auto group-data-[state=closed]/collapsible:hidden" />
+  </SidebarMenuButton>
+</CollapsibleTrigger>
+```
+
+### Alterar Estilo do Item Ativo
+
+No componente, os items usam `isActive`:
+
+```tsx
+<SidebarMenuButton asChild isActive={pathname === item.url}>
+  <Link href={item.url}>{item.title}</Link>
+</SidebarMenuButton>
+```
+
+Para customizar o estilo ativo, modifique o CSS do `SidebarMenuButton` em `components/ui/sidebar.tsx` ou use classes condicionais:
+
+```tsx
+<Link
+  href={item.url}
+  className={cn(
+    pathname === item.url && 'bg-accent font-semibold'
+  )}
+>
+  {item.title}
+</Link>
+```
+
+### Alterar Largura do Sidebar
+
+O componente usa o primitivo `Sidebar` que tem largura definida via CSS variables. Adicione em `globals.css`:
+
+```css
+:root {
+  --sidebar-width: 280px; /* Default: 16rem (256px) */
+}
+```
+
+### Adicionar Ícones aos Items
+
+Modifique a renderização do item:
+
+```tsx
+import { FileText, Folder } from 'lucide-react';
+
+// No loop de renderização
+<SidebarMenuButton asChild isActive={pathname === item.url}>
+  <Link href={item.url}>
+    {item.items ? <Folder className="size-4" /> : <FileText className="size-4" />}
+    {item.title}
+  </Link>
+</SidebarMenuButton>
+```
+
+## Lógica de Ordenação
+
+A função `sortPageTree` ordena por:
+
+1. **`order` definido** — Menor primeiro
+2. **Arquivos `index.mdx`** — Sempre no topo
+3. **Alfabético** — Fallback
+
+```tsx
+// Prioridade de ordenação
+const aOrder = getOrder(a); // number | undefined
+const bOrder = getOrder(b);
+
+if (aOrder !== undefined && bOrder !== undefined) {
+  return aOrder - bOrder; // Ambos têm order
+}
+if (aOrder !== undefined) return -1; // a tem order, b não
+if (bOrder !== undefined) return 1;  // b tem order, a não
+
+// Fallback: index.mdx primeiro, depois alfabético
+```
+
+## API
+
+### Props do AppSidebar
+
+| Prop | Tipo | Descrição |
+|------|------|-----------|
+| `tree` | `SidebarTree` | Árvore de páginas (de `source.getPageTree()`) |
+| `...props` | `ComponentProps<Sidebar>` | Props do primitivo Sidebar |
+
+### Frontmatter Suportado
+
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `title` | `string` | Título exibido no sidebar |
+| `order` | `number` | Ordem de exibição (menor = primeiro) |
+| `group` | `string` | Label de grupo acima do item |
+| `is_open` | `boolean` | Se a pasta inicia expandida (apenas index.mdx) |
+
+## Dependências
+
+- `@/lib/source` — Fonte de dados Fumadocs
+- `@/components/ui/sidebar` — Primitivos de sidebar
+- `@/components/ui/collapsible` — Itens colapsáveis
+- `next/navigation` — Hook `usePathname`

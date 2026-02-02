@@ -1,0 +1,278 @@
+---
+title: TOC
+description: Componente de índice de conteúdo (Table of Contents)
+order: 3.1
+tags: ["toc", "índice", "navegação"]
+---
+
+## Uso Básico
+
+```tsx
+import { DocToc } from '@/components/doc-toc';
+
+// No layout.tsx
+<DocToc />
+```
+
+O TOC é alimentado automaticamente pelo contexto `PageContent`.
+
+## Arquitetura
+
+```
+components/doc-toc.tsx       # UI (sidebar, dropdown, links)
+hooks/use-toc.ts             # Estado do TOC via window.toc
+hooks/use-scroll-progress.ts # Progresso de scroll
+hooks/use-hash-highlight.ts  # Highlight ao carregar com hash
+lib/toc-utils.ts             # Funções de navegação
+types/global.d.ts            # Interface TOCItem
+```
+
+## Estrutura de Arquivos
+
+### `types/global.d.ts`
+
+Define a interface do item TOC:
+
+```tsx
+export interface TOCItem {
+  title: ReactNode;
+  url: string;   // Ex: "#getting-started"
+  depth: number; // 2, 3, 4 (h2, h3, h4)
+}
+
+declare global {
+  interface Window {
+    toc?: TOCItem[];
+  }
+}
+```
+
+### `hooks/use-toc.ts`
+
+Hook para estado do TOC:
+
+```tsx
+import { useToc } from '@/hooks/use-toc';
+
+function MyComponent() {
+  const toc = useToc(); // TOCItem[]
+  // Reage automaticamente a mudanças de página
+}
+```
+
+### `hooks/use-scroll-progress.ts`
+
+Hook para tracking de scroll:
+
+```tsx
+import { useScrollProgress } from '@/hooks/use-scroll-progress';
+
+function MyComponent() {
+  const progress = useScrollProgress({ 
+    containerId: 'docs-content' 
+  });
+  // progress = 0-100 (porcentagem)
+}
+```
+
+### `hooks/use-hash-highlight.ts`
+
+Hook para highlight ao carregar com hash na URL:
+
+```tsx
+import { useHashHighlight } from '@/hooks/use-hash-highlight';
+
+function MyComponent() {
+  useHashHighlight({
+    delay: 100,    // Opcional, default: 100ms
+    enabled: true, // Opcional, default: true
+  });
+  // Automaticamente destaca #section ao carregar
+}
+```
+
+### `lib/toc-utils.ts`
+
+Funções de navegação:
+
+| Função | Descrição |
+|--------|-----------|
+| `highlightElement()` | Aplica animação de highlight |
+| `scrollToElement()` | Scroll suave até elemento |
+| `handleTocNavigation()` | Combina scroll + URL + highlight |
+
+## Customizações
+
+### Alterar Título do Índice
+
+No componente `doc-toc.tsx`, localize:
+
+```tsx
+<p className="text-muted-foreground bg-background sticky top-0 h-6 text-xs font-medium">
+  Índice {/* Altere aqui */}
+</p>
+```
+
+### Alterar Duração do Highlight
+
+Em `lib/toc-utils.ts`:
+
+```tsx
+export function highlightElement(id: string): void {
+  // ...
+  setTimeout(() => {
+    element.classList.remove('hash-highlight');
+  }, 3000); // Era 2000ms
+}
+```
+
+### Customizar Estilo do Highlight
+
+Em `globals.css`, adicione ou modifique:
+
+```css
+.hash-highlight {
+  animation: highlight-fade 2s ease-out;
+}
+
+@keyframes highlight-fade {
+  0% {
+    background-color: hsl(var(--primary) / 0.3);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+```
+
+### Alterar Indentação dos Níveis
+
+No componente, os níveis usam `data-depth`:
+
+```tsx
+<TOCItem
+  className="data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+  data-depth={item.depth}
+>
+```
+
+Para mais indentação:
+
+```tsx
+className="data-[depth=3]:pl-6 data-[depth=4]:pl-10"
+```
+
+### Alterar Estilo do Item Ativo
+
+O componente usa `data-[active=true]`:
+
+```tsx
+<TOCItem
+  className="data-[active=true]:bg-accent data-[active=true]:text-accent-foreground data-[active=true]:font-medium"
+>
+```
+
+### Alterar Barra de Progresso
+
+A barra de progresso é renderizada como:
+
+```tsx
+<div
+  className="absolute right-0 top-0 bottom-0 w-1 bg-primary rounded-full transition-all duration-300"
+  style={{ height: `${progress}%` }}
+/>
+```
+
+Para customizar:
+
+```tsx
+// Alterar cor
+className="... bg-green-500"
+
+// Alterar largura
+className="... w-2"
+
+// Alterar lado (esquerda)
+className="absolute left-0 ..."
+```
+
+### Ocultar em Mobile
+
+O componente já é responsivo:
+
+```tsx
+<Sidebar
+  className="... hidden xl:flex"
+>
+```
+
+Para mostrar em telas menores, altere `xl:flex` para `lg:flex` ou `md:flex`.
+
+### Usar Variante Dropdown
+
+O componente interno `DocsTableOfContents` suporta dropdown:
+
+```tsx
+<DocsTableOfContents 
+  toc={toc} 
+  variant="dropdown" // ou "list" (default)
+/>
+```
+
+O dropdown é útil para mobile ou áreas compactas.
+
+## Fluxo de Dados
+
+1. **`PageContent`** recebe TOC do MDX e seta `window.toc`
+2. **`useToc`** escuta `window.toc` e evento `toc-update`
+3. **`DocToc`** renderiza os items
+4. **`useScrollProgress`** monitora scroll do container
+5. **`AnchorProvider`** do Fumadocs marca item ativo
+
+```
+MDX → page.tsx → PageContent → window.toc
+                                    ↓
+                              toc-update event
+                                    ↓
+                              useToc() hook
+                                    ↓
+                              DocToc render
+```
+
+## API
+
+### Props do DocToc
+
+| Prop | Tipo | Descrição |
+|------|------|-----------|
+| `...props` | `ComponentProps<Sidebar>` | Props do primitivo Sidebar |
+
+### Hook useToc
+
+```tsx
+function useToc(): TOCItem[]
+```
+
+Retorna array de items do TOC, atualizado automaticamente.
+
+### Hook useScrollProgress
+
+| Prop | Tipo | Descrição |
+|------|------|-----------|
+| `containerId` | `string` | ID do elemento scrollável |
+
+Retorna `number` (0-100).
+
+### Hook useHashHighlight
+
+| Prop | Tipo | Default | Descrição |
+|------|------|---------|-----------|
+| `delay` | `number` | `100` | Delay antes de highlight (ms) |
+| `enabled` | `boolean` | `true` | Se o hook está ativo |
+
+## Dependências
+
+- `fumadocs-core/toc` — `AnchorProvider`, `TOCItem`
+- `@/contexts/page-content` — Provider do TOC
+- `@/components/ui/sidebar` — Primitivos
+- `@/components/ui/dropdown-menu` — Variante dropdown

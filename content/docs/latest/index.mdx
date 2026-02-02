@@ -1,0 +1,38 @@
+---
+title: Documentação
+description: Guia técnico do template de documentação Next.js
+order: 1
+group: Start
+tags: ["template", "documentação", "arquitetura"]
+version: "2.0.0"
+---
+
+## Arquitetura
+
+O projeto segue uma arquitetura de separação entre **UI** e **lógica**:
+
+| Pasta | Responsabilidade |
+|-------|------------------|
+| `components/` | Componentes do projeto (UI + estado local mínimo) |
+| `components/ui/` | Primitivos de UI (shadcn/ui) — **não modificar** |
+| `hooks/` | Hooks customizados (lógica reutilizável) |
+| `lib/` | Funções utilitárias e configurações |
+| `types/` | Definições TypeScript globais |
+| `contexts/` | Providers de estado global via React Context |
+
+## Componentes Principais
+
+- [**Search**](/docs/components/search) — Busca global na documentação
+- [**Sidebar**](/docs/components/sidebar) — Navegação lateral com árvore de páginas
+- [**TOC**](/docs/components/toc) — Índice de conteúdo da página atual
+
+## Guias
+
+- [**Criando Componentes**](/docs/guides/creating-components) — Padrões e convenções
+
+## Princípios
+
+1. **Layouts são declarativos** — `page.tsx` e `layout.tsx` apenas recebem componentes, sem lógica pesada
+2. **Lógica em hooks/lib** — Funções puras e hooks encapsulam comportamentos
+3. **Types centralizados** — Interfaces compartilhadas ficam em `types/`
+4. **UI primitivos intocáveis** — Nunca adicionar código em `components/ui/`

@@ -1,0 +1,186 @@
+---
+title: Search
+description: Componente de busca global na documentação
+order: 3.3
+tags: ["busca", "search", "navegação"]
+---
+
+## Uso Básico
+
+```tsx
+import { AppSearch } from '@/components/app-search';
+
+// No header ou navbar
+<AppSearch />
+```
+
+## Arquitetura
+
+```
+components/app-search.tsx    # UI (dialog, input, resultados)
+hooks/use-search-keyboard.ts # Hook do atalho Ctrl+K
+lib/search-utils.ts          # Funções de processamento
+types/search.ts              # Interfaces
+```
+
+## Estrutura de Arquivos
+
+### `types/search.ts`
+
+Define as interfaces dos resultados:
+
+```tsx
+export interface SearchMatch {
+  content: string;
+  url: string;
+}
+
+export interface SearchSection {
+  heading: string;
+  matches: SearchMatch[];
+}
+
+export interface SearchResultGroup {
+  pageTitle: string;
+  pageUrl: string;
+  sections: SearchSection[];
+}
+```
+
+### `lib/search-utils.ts`
+
+Funções puras de processamento:
+
+| Função | Descrição |
+|--------|-----------|
+| `parseHighlightParts()` | Separa texto em partes para highlight |
+| `truncateWithContext()` | Trunca texto mantendo contexto do match |
+| `formatHashToTitle()` | Converte hash URL em título legível |
+| `isRelevantResult()` | Filtra resultados por relevância |
+| `calculateRelevanceScore()` | Calcula score para ordenação |
+| `groupSearchResults()` | Agrupa resultados por página |
+
+### `hooks/use-search-keyboard.ts`
+
+Hook para atalho de teclado:
+
+```tsx
+import { useSearchKeyboard } from '@/hooks/use-search-keyboard';
+
+function MySearch() {
+  const [open, setOpen] = useState(false);
+  
+  useSearchKeyboard({
+    onToggle: () => setOpen((prev) => !prev),
+    key: 'k',        // Opcional, default: 'k'
+    enabled: true,   // Opcional, default: true
+  });
+}
+```
+
+## Customizações
+
+### Alterar Atalho de Teclado
+
+Modifique o hook no componente:
+
+```tsx
+// components/app-search.tsx
+useSearchKeyboard({
+  onToggle: React.useCallback(() => setOpen((prev) => !prev), []),
+  key: '/', // Muda para Ctrl+/
+});
+```
+
+### Alterar Placeholder
+
+No componente, localize o `Input`:
+
+```tsx
+<Input
+  placeholder="Buscar na documentação..." // Altere aqui
+  // ...
+/>
+```
+
+### Alterar Texto do Botão
+
+Localize o `Button` trigger:
+
+```tsx
+<Button variant="outline" size="sm" className="...">
+  <SearchIcon className="size-4" />
+  <span className="hidden sm:inline-flex">Buscar...</span>
+  {/* ... */}
+</Button>
+```
+
+### Customizar Estilo do Highlight
+
+Modifique o componente `HighlightedText`:
+
+```tsx
+function HighlightedText({ text, query }: { text: string; query: string }) {
+  const parts = parseHighlightParts(text, query);
+
+  return parts.map((part) =>
+    part.type === 'mark' ? (
+      <mark
+        key={part.key}
+        className="bg-yellow-200 text-yellow-900" // Customize aqui
+      >
+        {part.content}
+      </mark>
+    ) : (
+      part.content
+    ),
+  );
+}
+```
+
+### Alterar Limite de Resultados
+
+Em `lib/search-utils.ts`, na função `groupSearchResults`:
+
+```tsx
+// Limite total de resultados
+const limitedResults = relevantResults.slice(0, 50); // Era 30
+
+// Limite por seção (no final da função)
+matches: s.matches.slice(0, 5), // Era 3
+```
+
+### Alterar Tamanho do Contexto
+
+Na função `truncateWithContext`:
+
+```tsx
+export function truncateWithContext(
+  text: string,
+  query: string,
+  contextLength: number = 60, // Era 40
+): string {
+```
+
+## API
+
+### Props do AppSearch
+
+O componente não recebe props — é auto-contido.
+
+### Hook useSearchKeyboard
+
+| Prop | Tipo | Default | Descrição |
+|------|------|---------|-----------|
+| `onToggle` | `() => void` | — | Callback ao pressionar atalho |
+| `key` | `string` | `'k'` | Tecla do atalho |
+| `enabled` | `boolean` | `true` | Se o atalho está ativo |
+
+## Dependências
+
+- `fumadocs-core/search/client` — Hook `useDocsSearch`
+- `@/components/ui/dialog` — Modal
+- `@/components/ui/input` — Campo de busca
+- `@/components/ui/scroll-area` — Área de scroll
+- `@/components/ui/kbd` — Indicadores de tecla
+- `@/components/ui/spinner` — Loading

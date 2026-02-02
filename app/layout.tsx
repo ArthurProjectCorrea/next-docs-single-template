@@ -54,9 +54,7 @@ export default function RootLayout({
         >
           <TopLoader />
           <AppHeader />
-          <main className="container mx-auto flex flex-1 min-h-0">
-            {children}
-          </main>
+          <main className="flex flex-1 min-h-0 w-full">{children}</main>
         </ThemeProvider>
       </body>
     </html>

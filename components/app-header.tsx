@@ -9,26 +9,33 @@ import { AppSidebar } from './app-sidebar';
 
 export default function AppHeader() {
   return (
-    <header className="p-4 bg-background sticky top-0 z-50 flex w-full items-center border-b">
-      <div className="container mx-auto flex items-center justify-between">
-        <Link href="/" aria-label="Home">
+    <header className="h-[--header-height] px-6 py-2 bg-background sticky top-0 z-50 flex w-full items-center border-b">
+      <div className="flex w-full items-center justify-between gap-4">
+        {/* Logo */}
+        <Link href="/" aria-label="Home" className="shrink-0">
           <Image
             src="/next.svg"
             alt="Next.js"
-            width={99}
-            height={20}
+            width={90}
+            height={18}
             className="dark:invert"
           />
         </Link>
-        <div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex flex-1 justify-center">
           <AppNavbar />
-        </div>
-        <div className="md:hidden">
-          <AppSidebar />
-        </div>
-        <div className="hidden md:flex items-center gap-2">
+        </nav>
+
+        {/* Desktop Actions */}
+        <div className="hidden md:flex items-center gap-3">
           <AppSearch />
           <ModeToggle />
+        </div>
+
+        {/* Mobile Menu */}
+        <div className="md:hidden">
+          <AppSidebar />
         </div>
       </div>
     </header>

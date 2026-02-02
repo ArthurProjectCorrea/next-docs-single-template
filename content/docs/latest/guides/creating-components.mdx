@@ -1,0 +1,186 @@
+---
+title: Criando Componentes
+description: Padrões e convenções para criar componentes no projeto
+order: 2.1
+tags: ["componentes", "tutorial", "desenvolvimento"]
+---
+
+## Estrutura de Pastas
+
+```
+components/
+├── ui/                  # ❌ NÃO MODIFICAR — primitivos shadcn/ui
+│   ├── button.tsx
+│   ├── dialog.tsx
+│   └── ...
+├── app-search.tsx       # ✅ Componentes do projeto
+├── doc-sidebar.tsx
+├── doc-toc.tsx
+└── my-custom.tsx        # ✅ Seus componentes customizados
+```
+
+## Regras Obrigatórias
+
+### 1. Nunca adicionar código em `components/ui/`
+
+A pasta `ui/` contém primitivos de terceiros (shadcn/ui). Modificações quebram atualizações.
+
+```tsx
+// ❌ ERRADO: Modificar components/ui/button.tsx
+export function Button({ children, withIcon, ...props }) {
+  // Lógica customizada aqui
+}
+
+// ✅ CORRETO: Criar wrapper em components/
+// components/icon-button.tsx
+import { Button } from '@/components/ui/button';
+
+export function IconButton({ icon, children, ...props }) {
+  return (
+    <Button {...props}>
+      {icon}
+      {children}
+    </Button>
+  );
+}
+```
+
+### 2. Separar UI de Lógica
+
+Componentes devem focar em **renderização**. Lógica vai para `hooks/` ou `lib/`.
+
+```tsx
+// ❌ ERRADO: Lógica embutida no componente
+function MyComponent() {
+  const [data, setData] = useState([]);
+  
+  useEffect(() => {
+    // 50 linhas de lógica de fetch, transformação, etc.
+  }, []);
+  
+  const processData = (items) => {
+    // 30 linhas de processamento
+  };
+  
+  return <div>{/* UI */}</div>;
+}
+
+// ✅ CORRETO: Lógica extraída
+// hooks/use-my-data.ts
+export function useMyData() {
+  const [data, setData] = useState([]);
+  useEffect(() => { /* fetch */ }, []);
+  return data;
+}
+
+// lib/data-utils.ts
+export function processData(items) {
+  // transformação pura
+}
+
+// components/my-component.tsx
+import { useMyData } from '@/hooks/use-my-data';
+import { processData } from '@/lib/data-utils';
+
+function MyComponent() {
+  const data = useMyData();
+  const processed = processData(data);
+  return <div>{/* UI com processed */}</div>;
+}
+```
+
+### 3. Usar Imports Absolutos
+
+Sempre use o alias `@/` para imports.
+
+```tsx
+// ❌ ERRADO
+import { Button } from '../../../components/ui/button';
+
+// ✅ CORRETO
+import { Button } from '@/components/ui/button';
+import { useMyHook } from '@/hooks/use-my-hook';
+import { myUtil } from '@/lib/my-utils';
+import type { MyType } from '@/types/my-types';
+```
+
+### 4. Definir Types em `types/`
+
+Interfaces compartilhadas ficam centralizadas.
+
+```tsx
+// ❌ ERRADO: Types inline no componente
+interface SearchResult {
+  title: string;
+  url: string;
+}
+
+function Search() {
+  const [results, setResults] = useState<SearchResult[]>([]);
+}
+
+// ✅ CORRETO: Types em arquivo dedicado
+// types/search.ts
+export interface SearchResult {
+  title: string;
+  url: string;
+}
+
+// components/search.tsx
+import type { SearchResult } from '@/types/search';
+```
+
+## Anatomia de um Componente
+
+```tsx
+'use client'; // Apenas se usar hooks/estado
+
+import * as React from 'react';
+
+// 1. Imports externos
+import { SomeIcon } from 'lucide-react';
+
+// 2. Imports internos: lib, hooks, types
+import { cn } from '@/lib/utils';
+import { useMyHook } from '@/hooks/use-my-hook';
+import type { MyType } from '@/types/my-type';
+
+// 3. Imports de UI (por último)
+import { Button } from '@/components/ui/button';
+
+// 4. Subcomponentes internos (se necessário)
+function InternalPart({ data }: { data: MyType }) {
+  return <div>{/* ... */}</div>;
+}
+
+// 5. Componente principal exportado
+export function MyComponent({
+  className,
+  ...props
+}: React.ComponentProps<'div'>) {
+  // Hooks primeiro
+  const data = useMyHook();
+  const [state, setState] = React.useState(false);
+
+  // Handlers
+  const handleClick = () => setState(true);
+
+  // Render
+  return (
+    <div className={cn('base-classes', className)} {...props}>
+      <InternalPart data={data} />
+      <Button onClick={handleClick}>Action</Button>
+    </div>
+  );
+}
+```
+
+## Checklist
+
+Antes de criar um componente, verifique:
+
+- [ ] Existe um primitivo em `components/ui/` que resolve?
+- [ ] A lógica pode ser extraída para `hooks/` ou `lib/`?
+- [ ] Os types estão em `types/`?
+- [ ] Imports usam alias `@/`?
+- [ ] O componente está em `components/` (não em `ui/`)?

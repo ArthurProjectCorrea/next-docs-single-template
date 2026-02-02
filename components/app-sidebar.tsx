@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import {
@@ -16,15 +17,18 @@ import { ModeToggle } from './mode-toggle';
 
 export function AppSidebar() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <>
-      <div className="md:hidden">
-        <Button variant="outline" size="icon" onClick={() => setOpen(true)}>
-          <Menu className="h-4 w-4" />
-        </Button>
-      </div>
-
+      <Button
+        variant="outline"
+        size="icon"
+        onClick={() => setOpen(true)}
+        className="h-9 w-9 md:hidden"
+      >
+        <Menu className="size-4" />
+      </Button>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="right" className="p-4 flex flex-col h-full">
           <SheetHeader>
@@ -36,17 +40,22 @@ export function AppSidebar() {
 
           <nav className="mt-6">
             <ul className="flex flex-col gap-3">
-              {navbarData.map((item: { label: string; href: string }) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="block w-full rounded-md px-3 py-2 text-base hover:bg-accent"
-                    onClick={() => setOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
+              {navbarData.map((item: { label: string; href: string }) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className={`block w-full rounded-md px-3 py-2 text-base hover:bg-accent ${
+                        isActive ? 'bg-accent text-primary font-medium' : ''
+                      }`}
+                      onClick={() => setOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
 

@@ -2,8 +2,15 @@
 
 import * as React from 'react';
 import { Menu } from 'lucide-react';
+import { AnchorProvider, TOCItem } from 'fumadocs-core/toc';
 
 import { cn } from '@/lib/utils';
+import { handleTocNavigation } from '@/lib/toc-utils';
+import { useToc } from '@/hooks/use-toc';
+import { useScrollProgress } from '@/hooks/use-scroll-progress';
+import { useHashHighlight } from '@/hooks/use-hash-highlight';
+import type { TOCItem as TOCItemType } from '@/types/global';
+
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,56 +24,29 @@ import {
   SidebarGroup,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { AnchorProvider, TOCItem } from 'fumadocs-core/toc';
-import type { TOCItem as TOCItemType } from '@/types/global';
-
-/**
- * Applies a highlight animation to the target element when navigating via TOC
- */
-function highlightElement(id: string) {
-  const element = document.getElementById(id);
-  if (!element) return;
-
-  // Remove any existing highlight
-  element.classList.remove('hash-highlight');
-  // Force reflow to restart animation
-  void element.offsetWidth;
-  // Add highlight class
-  element.classList.add('hash-highlight');
-
-  // Remove highlight after animation completes
-  setTimeout(() => {
-    element.classList.remove('hash-highlight');
-  }, 2000);
-}
-
-/**
- * Scrolls to element with proper offset
- */
-function scrollToElement(id: string) {
-  const element = document.getElementById(id);
-  if (!element) return;
-
-  element.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start',
-  });
-}
 
 function DocsTableOfContents({
   toc,
   variant = 'list',
   className,
+  onNavigate,
 }: {
   toc: TOCItemType[];
   variant?: 'dropdown' | 'list';
   className?: string;
+  onNavigate?: (url: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
 
   if (!toc?.length) {
     return null;
   }
+
+  const handleItemClick = (e: React.MouseEvent, url: string) => {
+    e.preventDefault();
+    handleTocNavigation(url);
+    onNavigate?.(url);
+  };
 
   if (variant === 'dropdown') {
     return (
@@ -93,11 +73,7 @@ function DocsTableOfContents({
               <TOCItem
                 href={item.url}
                 onClick={(e) => {
-                  e.preventDefault();
-                  const id = item.url.slice(1);
-                  scrollToElement(id);
-                  window.history.pushState(null, '', item.url);
-                  highlightElement(id);
+                  handleItemClick(e, item.url);
                   setOpen(false);
                 }}
               >
@@ -119,15 +95,7 @@ function DocsTableOfContents({
         <TOCItem
           key={item.url}
           href={item.url}
-          onClick={(e) => {
-            e.preventDefault();
-            const id = item.url.slice(1);
-            scrollToElement(id);
-            // Update URL hash without triggering navigation
-            window.history.pushState(null, '', item.url);
-            // Apply highlight animation
-            highlightElement(id);
-          }}
+          onClick={(e) => handleItemClick(e, item.url)}
           className="text-muted-foreground hover:text-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground text-[0.8rem] no-underline transition-colors data-[active=true]:font-medium data-[depth=3]:pl-4 data-[depth=4]:pl-6 rounded px-2 py-1"
           data-depth={item.depth}
         >
@@ -139,51 +107,16 @@ function DocsTableOfContents({
 }
 
 export function DocToc({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [toc, setToc] = React.useState<TOCItemType[]>([]);
-  const [progress, setProgress] = React.useState(0);
-
-  React.useEffect(() => {
-    // Initial load
-    setToc(window.toc || []);
-
-    // Listen for TOC updates
-    const handleTocUpdate = () => {
-      setToc(window.toc || []);
-    };
-
-    window.addEventListener('toc-update', handleTocUpdate);
-    return () => window.removeEventListener('toc-update', handleTocUpdate);
-  }, []);
+  // Use extracted hooks for state management
+  const toc = useToc();
+  const progress = useScrollProgress({ containerId: 'docs-content' });
 
   // Highlight element when page loads with hash
-  React.useEffect(() => {
-    if (window.location.hash) {
-      const id = window.location.hash.slice(1);
-      // Small delay to ensure element is rendered
-      setTimeout(() => {
-        scrollToElement(id);
-        highlightElement(id);
-      }, 100);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    const root = document.getElementById('docs-content');
-    if (!root) return;
-    const updateProgress = () => {
-      const scrollTop = root.scrollTop;
-      const scrollHeight = root.scrollHeight - root.clientHeight;
-      const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-      setProgress(progress);
-    };
-    root.addEventListener('scroll', updateProgress);
-    updateProgress();
-    return () => root.removeEventListener('scroll', updateProgress);
-  }, []);
+  useHashHighlight();
 
   return (
     <Sidebar
-      className="sticky top-[calc(var(--header-height)+1px)] z-30 hidden h-[calc(100svh-var(--header-height)-1rem)] overscroll-none bg-transparent xl:flex"
+      className="sticky top-[var(--header-height)] right-0 z-30 hidden h-[calc(100svh-var(--header-height))] overscroll-none bg-background xl:flex"
       collapsible="none"
       {...props}
     >
