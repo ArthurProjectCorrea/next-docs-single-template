@@ -183,13 +183,13 @@ export function DocToc({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar
-      className="sticky top-[calc(var(--header-height)+1px)] z-30 hidden h-[calc(100svh-6rem)] overscroll-none bg-transparent lg:flex"
+      className="sticky top-[calc(var(--header-height)+1px)] z-30 hidden h-[calc(100svh-var(--header-height)-1rem)] overscroll-none bg-transparent xl:flex"
       collapsible="none"
       {...props}
     >
       <SidebarContent className="no-scrollbar overflow-x-hidden px-2 relative">
         <div
-          className="absolute right-0 top-0 bottom-0 w-1 bg-blue-500 rounded-full transition-all duration-300"
+          className="absolute right-0 top-0 bottom-0 w-1 bg-primary rounded-full transition-all duration-300"
           style={{ height: `${progress}%` }}
         />
         <div className="from-background via-background/80 to-background/50 sticky -top-1 z-10 h-8 shrink-0 bg-linear-to-b blur-xs" />

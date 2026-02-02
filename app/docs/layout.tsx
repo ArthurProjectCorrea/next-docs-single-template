@@ -79,7 +79,7 @@ export default function DocsLayout({
   };
 
   return (
-    <div className="container mx-auto flex h-full">
+    <div className="flex h-full w-full">
       <SidebarProvider className="flex">
         <AppSidebar tree={sortedTree} />
 
