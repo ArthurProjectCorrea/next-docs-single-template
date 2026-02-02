@@ -4,6 +4,7 @@ import AppNavbar from './app-navbar';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ModeToggle } from './mode-toggle';
+import { AppSearch } from './app-search';
 import { AppSidebar } from './app-sidebar';
 
 export default function AppHeader() {
@@ -25,7 +26,8 @@ export default function AppHeader() {
         <div className="md:hidden">
           <AppSidebar />
         </div>
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-2">
+          <AppSearch />
           <ModeToggle />
         </div>
       </div>

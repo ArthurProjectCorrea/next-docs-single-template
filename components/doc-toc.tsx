@@ -18,11 +18,39 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar';
 import { AnchorProvider, TOCItem } from 'fumadocs-core/toc';
+import type { TOCItem as TOCItemType } from '@/types/global';
 
-declare global {
-  interface Window {
-    toc?: { title: React.ReactNode; url: string; depth: number }[];
-  }
+/**
+ * Applies a highlight animation to the target element when navigating via TOC
+ */
+function highlightElement(id: string) {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  // Remove any existing highlight
+  element.classList.remove('hash-highlight');
+  // Force reflow to restart animation
+  void element.offsetWidth;
+  // Add highlight class
+  element.classList.add('hash-highlight');
+
+  // Remove highlight after animation completes
+  setTimeout(() => {
+    element.classList.remove('hash-highlight');
+  }, 2000);
+}
+
+/**
+ * Scrolls to element with proper offset
+ */
+function scrollToElement(id: string) {
+  const element = document.getElementById(id);
+  if (!element) return;
+
+  element.scrollIntoView({
+    behavior: 'smooth',
+    block: 'start',
+  });
 }
 
 function DocsTableOfContents({
@@ -30,11 +58,7 @@ function DocsTableOfContents({
   variant = 'list',
   className,
 }: {
-  toc: {
-    title?: React.ReactNode;
-    url: string;
-    depth: number;
-  }[];
+  toc: TOCItemType[];
   variant?: 'dropdown' | 'list';
   className?: string;
 }) {
@@ -53,7 +77,7 @@ function DocsTableOfContents({
             size="sm"
             className={cn('h-8 md:h-7', className)}
           >
-            <Menu /> On This Page 2
+            <Menu /> On This Page
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -71,9 +95,9 @@ function DocsTableOfContents({
                 onClick={(e) => {
                   e.preventDefault();
                   const id = item.url.slice(1);
-                  document
-                    .getElementById(id)
-                    ?.scrollIntoView({ behavior: 'smooth' });
+                  scrollToElement(id);
+                  window.history.pushState(null, '', item.url);
+                  highlightElement(id);
                   setOpen(false);
                 }}
               >
@@ -98,7 +122,11 @@ function DocsTableOfContents({
           onClick={(e) => {
             e.preventDefault();
             const id = item.url.slice(1);
-            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+            scrollToElement(id);
+            // Update URL hash without triggering navigation
+            window.history.pushState(null, '', item.url);
+            // Apply highlight animation
+            highlightElement(id);
           }}
           className="text-muted-foreground hover:text-foreground data-[active=true]:bg-accent data-[active=true]:text-accent-foreground text-[0.8rem] no-underline transition-colors data-[active=true]:font-medium data-[depth=3]:pl-4 data-[depth=4]:pl-6 rounded px-2 py-1"
           data-depth={item.depth}
@@ -111,13 +139,34 @@ function DocsTableOfContents({
 }
 
 export function DocToc({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [toc, setToc] = React.useState<
-    { title: React.ReactNode; url: string; depth: number }[]
-  >([]);
+  const [toc, setToc] = React.useState<TOCItemType[]>([]);
   const [progress, setProgress] = React.useState(0);
+
   React.useEffect(() => {
+    // Initial load
     setToc(window.toc || []);
+
+    // Listen for TOC updates
+    const handleTocUpdate = () => {
+      setToc(window.toc || []);
+    };
+
+    window.addEventListener('toc-update', handleTocUpdate);
+    return () => window.removeEventListener('toc-update', handleTocUpdate);
   }, []);
+
+  // Highlight element when page loads with hash
+  React.useEffect(() => {
+    if (window.location.hash) {
+      const id = window.location.hash.slice(1);
+      // Small delay to ensure element is rendered
+      setTimeout(() => {
+        scrollToElement(id);
+        highlightElement(id);
+      }, 100);
+    }
+  }, []);
+
   React.useEffect(() => {
     const root = document.getElementById('docs-content');
     if (!root) return;
@@ -131,7 +180,6 @@ export function DocToc({ ...props }: React.ComponentProps<typeof Sidebar>) {
     updateProgress();
     return () => root.removeEventListener('scroll', updateProgress);
   }, []);
-  console.log('TOC items:', toc);
 
   return (
     <Sidebar

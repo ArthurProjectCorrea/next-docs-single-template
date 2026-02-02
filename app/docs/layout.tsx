@@ -73,7 +73,6 @@ export default function DocsLayout({
   children: React.ReactNode;
 }) {
   const tree = source.getPageTree();
-  console.log('Page Tree:', tree);
   const sortedTree = {
     ...tree,
     children: sortTree(tree.children as unknown as PageTreeNode[]),
@@ -87,7 +86,7 @@ export default function DocsLayout({
         <SidebarInset
           id="docs-content"
           className="overflow-y-auto"
-          style={{ scrollPaddingTop: 'var(--header-height)' }}
+          style={{ scrollPaddingTop: '1.5rem' }}
         >
           {children}
         </SidebarInset>

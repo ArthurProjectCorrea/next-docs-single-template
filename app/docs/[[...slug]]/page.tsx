@@ -15,15 +15,11 @@ export default async function Page({
 
   const MDX = page.data.body;
 
-  console.log('Page TOC:', page.data.toc);
-
   return (
     <PageContent toc={page.data.toc}>
       <div className="prose prose-lg max-w-none p-8">
-        <div className="from-background via-background/80 to-background/50 sticky -top-1 z-10 h-8 shrink-0 bg-linear-to-b blur-xs" />
         <MDX components={components} />
       </div>
-      <div className="from-background via-background/80 to-background/50 sticky -top-1 z-10 h-8 shrink-0 bg-linear-to-b blur-xs" />
     </PageContent>
   );
 }

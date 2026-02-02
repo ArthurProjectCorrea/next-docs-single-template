@@ -2,22 +2,19 @@
 
 import { TOCProvider } from '@/contexts/toc-context';
 import { useEffect } from 'react';
-
-declare global {
-  interface Window {
-    toc?: { title: React.ReactNode; url: string; depth: number }[];
-  }
-}
+import type { TOCItem } from '@/types/global';
 
 export function PageContent({
   toc,
   children,
 }: {
-  toc: { title: React.ReactNode; url: string; depth: number }[];
+  toc: TOCItem[];
   children: React.ReactNode;
 }) {
   useEffect(() => {
     window.toc = toc;
+    // Dispatch custom event to notify DocToc
+    window.dispatchEvent(new CustomEvent('toc-update'));
   }, [toc]);
 
   return <TOCProvider toc={toc}>{children}</TOCProvider>;

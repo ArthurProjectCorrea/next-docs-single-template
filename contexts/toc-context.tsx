@@ -1,12 +1,7 @@
 'use client';
 
 import { createContext, useContext } from 'react';
-
-type TOCItem = {
-  title: React.ReactNode;
-  url: string;
-  depth: number;
-};
+import type { TOCItem } from '@/types/global';
 
 const TOCContext = createContext<TOCItem[]>([]);
 
