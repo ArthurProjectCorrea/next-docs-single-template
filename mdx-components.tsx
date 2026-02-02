@@ -1,8 +1,28 @@
 import type { MDXComponents } from 'mdx/types';
+import * as React from 'react';
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function getTextFromChildren(children: React.ReactNode): string {
+  if (typeof children === 'string') return children;
+  if (Array.isArray(children))
+    return children.map(getTextFromChildren).join('');
+  if (React.isValidElement(children))
+    return getTextFromChildren(
+      (children.props as { children?: React.ReactNode }).children,
+    );
+  return '';
+}
 
 const components: MDXComponents = {
   h1: ({ children, ...props }) => (
     <h1
+      id={slugify(getTextFromChildren(children))}
       className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl"
       {...props}
     >
@@ -11,6 +31,7 @@ const components: MDXComponents = {
   ),
   h2: ({ children, ...props }) => (
     <h2
+      id={slugify(getTextFromChildren(children))}
       className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0"
       {...props}
     >
@@ -19,6 +40,7 @@ const components: MDXComponents = {
   ),
   h3: ({ children, ...props }) => (
     <h3
+      id={slugify(getTextFromChildren(children))}
       className="scroll-m-20 text-2xl font-semibold tracking-tight"
       {...props}
     >
@@ -26,7 +48,11 @@ const components: MDXComponents = {
     </h3>
   ),
   h4: ({ children, ...props }) => (
-    <h4 className="scroll-m-20 text-xl font-semibold tracking-tight" {...props}>
+    <h4
+      id={slugify(getTextFromChildren(children))}
+      className="scroll-m-20 text-xl font-semibold tracking-tight"
+      {...props}
+    >
       {children}
     </h4>
   ),

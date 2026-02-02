@@ -9,6 +9,7 @@ export const docs = defineDocs({
       description: z.string().optional(),
       is_open: z.boolean().optional(),
       group: z.string().optional(),
+      order: z.number().optional(),
     }),
   },
 });

@@ -9,6 +9,8 @@ Short, actionable instructions to help an AI coding agent be productive in this 
 - Next.js (App Router) + TypeScript + Tailwind: app-centric folder layout lives under `app/`; pages and examples mix server and client components.
 - UI primitives (upstream or third-party) live in `components/ui/`. Project-specific, reusable components belong in the root `components/` folder (see `.github/instructions/components.instructions.md`).
 - Documentation for component patterns lives in `docs/shadcn-ui/` — this is the primary source for usage, accessibility, and examples.
+- Fumadocs integration: MDX content in `content/docs/`, processed via `fumadocs-mdx` and `fumadocs-core` for dynamic documentation with TOC, search, and sidebar navigation.
+- Contexts for shared state: `contexts/` folder holds React context providers (e.g., TOC context for table of contents).
 - Build and developer flows are conservative: formatting and linting are enforced via `lefthook` + `lint-staged` to maintain consistent style.
 
 ## Where to look first
@@ -16,6 +18,8 @@ Short, actionable instructions to help an AI coding agent be productive in this 
 - App entry & theming: `app/layout.tsx`, `components/theme-provider.tsx` (see ThemeProvider usage and TopLoader integration).
 - Component patterns and primitives: `components/ui/` (primitives) and `components/` (project components).
 - Component documentation: `docs/shadcn-ui/` and `.github/instructions/components.instructions.md`.
+- Fumadocs setup: `lib/source.ts` (source configuration), `source.config.ts` (schema for MDX frontmatter), `app/docs/layout.tsx` (page tree sorting and sidebar).
+- Contexts: `contexts/` for providers like TOC context.
 - CI workflow: `.github/workflows/ci.yml` — runs `build`, `lint`, and `prettier --check`.
 - Commit prompt: `.github/prompts/commit.prompt.md` (semantic commit guideline for the project).
 
@@ -25,6 +29,13 @@ Short, actionable instructions to help an AI coding agent be productive in this 
   - Do not add custom components to `components/ui/`; put them under `components/` instead.
   - Prefer composition and wrappers to extend upstream primitives rather than copying them.
   - Use absolute imports with the `@/` alias: `import X from '@/components/X'` or `import { Button } from '@/components/ui/button'`.
+- Contexts:
+  - Place React context providers in `contexts/` folder, not in `components/`.
+  - Example: `contexts/toc-context.tsx` for TOC state management.
+- MDX and Docs:
+  - Content in `content/docs/` with frontmatter (title, description, group, order).
+  - Sidebar order controlled by `order` field; sorting logic in `app/docs/layout.tsx` fetches data dynamically.
+  - Use Fumadocs hooks like `useTOC` for TOC integration.
 - Formatting & linting:
   - Prettier (with `prettier-plugin-tailwindcss`) is authoritative. Run `npm run format` locally and rely on `lint-staged` in pre-commit hooks.
   - Lint with `npm run lint` and fix issues before opening PRs.
@@ -42,6 +53,7 @@ Short, actionable instructions to help an AI coding agent be productive in this 
   - Example: `components/ui/resizable.tsx` was updated to use `Group`, `Panel`, `Separator` after discovering different runtime exports.
 - ESLint purity error example: `components/ui/sidebar.tsx` previously called `Math.random()` during render — replace impure calls or compute deterministic placeholders for skeletons.
 - Dark-mode integration: follow `docs/shadcn-ui/dark-mode.md` and ensure `ThemeProvider` is applied in `app/layout.tsx` with `suppressHydrationWarning` on `<html>` when necessary.
+- Fumadocs issues: If sidebar order is wrong, check `order` in MDX frontmatter and `sortTree` function in `app/docs/layout.tsx` for data fetching.
 
 ## How to add a component or change UI
 

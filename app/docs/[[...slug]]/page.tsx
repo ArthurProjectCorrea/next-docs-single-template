@@ -2,6 +2,7 @@ import { source } from '@/lib/source';
 import { notFound } from 'next/navigation';
 import components from '@/mdx-components';
 import type { Metadata } from 'next';
+import { PageContent } from '@/contexts/page-content';
 
 export default async function Page({
   params,
@@ -14,10 +15,16 @@ export default async function Page({
 
   const MDX = page.data.body;
 
+  console.log('Page TOC:', page.data.toc);
+
   return (
-    <div className="prose prose-lg max-w-none p-8">
-      <MDX components={components} />
-    </div>
+    <PageContent toc={page.data.toc}>
+      <div className="prose prose-lg max-w-none p-8">
+        <div className="from-background via-background/80 to-background/50 sticky -top-1 z-10 h-8 shrink-0 bg-linear-to-b blur-xs" />
+        <MDX components={components} />
+      </div>
+      <div className="from-background via-background/80 to-background/50 sticky -top-1 z-10 h-8 shrink-0 bg-linear-to-b blur-xs" />
+    </PageContent>
   );
 }
 

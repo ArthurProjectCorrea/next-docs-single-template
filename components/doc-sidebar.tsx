@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import Link from 'next/link';
 import { Minus, Plus } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { source } from '@/lib/source';
@@ -131,12 +132,18 @@ export function AppSidebar({
               <SidebarMenuSub>
                 {item.items.map((subItem) => (
                   <SidebarMenuSubItem key={subItem.title}>
-                    <SidebarMenuSubButton
-                      asChild
-                      isActive={pathname === subItem.url}
-                    >
-                      <a href={subItem.url}>{subItem.title}</a>
-                    </SidebarMenuSubButton>
+                    {subItem.url ? (
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={pathname === subItem.url}
+                      >
+                        <Link href={subItem.url}>{subItem.title}</Link>
+                      </SidebarMenuSubButton>
+                    ) : (
+                      <SidebarMenuSubButton isActive={false}>
+                        {subItem.title}
+                      </SidebarMenuSubButton>
+                    )}
                   </SidebarMenuSubItem>
                 ))}
               </SidebarMenuSub>
@@ -147,9 +154,13 @@ export function AppSidebar({
     } else {
       elements.push(
         <SidebarMenuItem key={item.title}>
-          <SidebarMenuButton asChild isActive={pathname === item.url}>
-            <a href={item.url}>{item.title}</a>
-          </SidebarMenuButton>
+          {item.url ? (
+            <SidebarMenuButton asChild isActive={pathname === item.url}>
+              <Link href={item.url}>{item.title}</Link>
+            </SidebarMenuButton>
+          ) : (
+            <SidebarMenuButton isActive={false}>{item.title}</SidebarMenuButton>
+          )}
         </SidebarMenuItem>,
       );
     }

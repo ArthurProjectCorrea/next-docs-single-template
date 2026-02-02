@@ -4,19 +4,49 @@ import { DocToc } from '@/components/doc-toc';
 import { source } from '@/lib/source';
 
 interface PageTreeNode {
+  type: 'page' | 'folder';
+  name: string;
+  url?: string;
+  children?: PageTreeNode[];
+  index?: { url: string };
   $id?: string;
   $ref?: { file: string };
-  children?: PageTreeNode[];
   [key: string]: unknown;
 }
 
 function sortTree(nodes: PageTreeNode[]): PageTreeNode[] {
-  return nodes
+  const sorted = nodes
     .map((node) => ({
       ...node,
       children: node.children ? sortTree(node.children) : undefined,
     }))
     .sort((a, b) => {
+      const getOrder = (node: PageTreeNode) => {
+        if (node.type === 'page' && node.url) {
+          const slug =
+            node.url === '/docs' ? '' : node.url.replace('/docs/', '');
+          const path = slug === '' ? [] : slug.split('/');
+          const page = source.getPage(path);
+          return page?.data?.order as number | undefined;
+        } else if (node.type === 'folder' && node.index) {
+          const slug = node.index.url.replace('/docs/', '');
+          const path = slug === '' ? [] : slug.split('/');
+          const page = source.getPage(path);
+          return page?.data?.order as number | undefined;
+        }
+        return undefined;
+      };
+
+      const aOrder = getOrder(a);
+      const bOrder = getOrder(b);
+
+      if (aOrder !== undefined && bOrder !== undefined) {
+        return aOrder - bOrder;
+      }
+
+      if (aOrder !== undefined) return -1;
+      if (bOrder !== undefined) return 1;
+
       const aKey = a.$ref?.file || a.$id || '';
       const bKey = b.$ref?.file || b.$id || '';
 
@@ -34,6 +64,7 @@ function sortTree(nodes: PageTreeNode[]): PageTreeNode[] {
         sensitivity: 'base',
       });
     });
+  return sorted;
 }
 
 export default function DocsLayout({
@@ -42,9 +73,10 @@ export default function DocsLayout({
   children: React.ReactNode;
 }) {
   const tree = source.getPageTree();
+  console.log('Page Tree:', tree);
   const sortedTree = {
     ...tree,
-    children: sortTree(tree.children),
+    children: sortTree(tree.children as unknown as PageTreeNode[]),
   };
 
   return (
