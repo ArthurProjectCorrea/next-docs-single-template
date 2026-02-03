@@ -9,6 +9,8 @@ import type { TOCItem } from '@/types/global';
  *
  * @returns Current TOC items array
  */
+const EMPTY_TOC: TOCItem[] = [];
+
 export function useToc(): TOCItem[] {
   const subscribe = useCallback((callback: () => void) => {
     window.addEventListener('toc-update', callback);
@@ -20,7 +22,7 @@ export function useToc(): TOCItem[] {
   }, []);
 
   const getServerSnapshot = useCallback(() => {
-    return [] as TOCItem[];
+    return EMPTY_TOC;
   }, []);
 
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);

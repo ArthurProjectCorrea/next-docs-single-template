@@ -1,6 +1,7 @@
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { DocPagination } from '@/components/doc-pagination';
+import { DocBreadcrumbs } from '@/components/doc-breadcrumbs';
 import type { PaginationData } from '@/lib/pagination-utils';
 
 interface DocHeaderProps {
@@ -8,6 +9,8 @@ interface DocHeaderProps {
   description?: string;
   tags?: string[];
   pagination?: PaginationData;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tree?: any;
 }
 
 export function DocHeader({
@@ -15,13 +18,15 @@ export function DocHeader({
   description,
   tags,
   pagination,
+  tree,
 }: DocHeaderProps) {
   if (!title) return null;
 
   return (
     <header className="mb-8">
-      <div className="flex items-start justify-between gap-4">
-        <h1 className="text-4xl font-bold tracking-tight">{title}</h1>
+      {tree && <DocBreadcrumbs tree={tree} pageTitle={title} />}
+      <div className="flex items-start justify-between gap-4 mt-2">
+        <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
         {pagination && <DocPagination pagination={pagination} variant="mini" />}
       </div>
       {description && (

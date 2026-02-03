@@ -20,24 +20,24 @@ export function DocPagination({
     return (
       <div className="flex items-center gap-1">
         {prev ? (
-          <Button variant="default" size="icon" className="h-8 w-8" asChild>
+          <Button variant="outline" size="icon" className="h-8 w-8" asChild>
             <Link href={prev.url} title={prev.title}>
               <ChevronLeftIcon className="size-4" />
             </Link>
           </Button>
         ) : (
-          <Button variant="default" size="icon" className="h-8 w-8" disabled>
+          <Button variant="outline" size="icon" className="h-8 w-8" disabled>
             <ChevronLeftIcon className="size-4" />
           </Button>
         )}
         {next ? (
-          <Button variant="default" size="icon" className="h-8 w-8" asChild>
+          <Button variant="outline" size="icon" className="h-8 w-8" asChild>
             <Link href={next.url} title={next.title}>
               <ChevronRightIcon className="size-4" />
             </Link>
           </Button>
         ) : (
-          <Button variant="default" size="icon" className="h-8 w-8" disabled>
+          <Button variant="outline" size="icon" className="h-8 w-8" disabled>
             <ChevronRightIcon className="size-4" />
           </Button>
         )}

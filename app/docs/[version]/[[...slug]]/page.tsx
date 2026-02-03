@@ -36,6 +36,7 @@ export default async function Page({ params }: PageProps) {
   const data = page.data as unknown as PageData;
   const MDX = data.body;
   const pagination = getPaginationData(page.url, version);
+  const tree = source.getPageTree();
 
   return (
     <PageContent toc={data.toc}>
@@ -45,6 +46,7 @@ export default async function Page({ params }: PageProps) {
           description={data.description}
           tags={data.tags}
           pagination={pagination}
+          tree={tree}
         />
         <MDX components={components} />
         <DocPagination pagination={pagination} variant="full" />

@@ -65,7 +65,7 @@ const components: MDXComponents = {
   h2: ({ children, ...props }) => (
     <Heading
       level={2}
-      className="scroll-m-20 mt-12 border-b border-border pb-2 text-2xl font-semibold tracking-tight text-foreground first:mt-0"
+      className="scroll-m-20 mt-12 pb-2 text-2xl font-semibold tracking-tight text-foreground first:mt-0"
       {...props}
     >
       {children}
@@ -96,6 +96,34 @@ const components: MDXComponents = {
       className="mt-4 leading-7 text-foreground/90 [&:not(:first-child)]:mt-4"
       {...props}
     >
+      {children}
+    </p>
+  ),
+
+  // Lead
+  Lead: ({ children, ...props }) => (
+    <p className="text-xl text-muted-foreground" {...props}>
+      {children}
+    </p>
+  ),
+
+  // Large
+  Large: ({ children, ...props }) => (
+    <span className="text-lg font-semibold" {...props}>
+      {children}
+    </span>
+  ),
+
+  // Small
+  Small: ({ children, ...props }) => (
+    <small className="text-sm font-medium leading-none" {...props}>
+      {children}
+    </small>
+  ),
+
+  // Muted
+  Muted: ({ children, ...props }) => (
+    <p className="text-sm text-muted-foreground" {...props}>
       {children}
     </p>
   ),
