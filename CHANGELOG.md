@@ -1,3 +1,11 @@
+# [1.1.0](https://github.com/ArthurProjectCorrea/next-docs-single-template/compare/v1.0.0...v1.1.0) (2026-02-03)
+
+### Features
+
+- **docs:** add breadcrumb navigation to documentation pages ([cc7fd34](https://github.com/ArthurProjectCorrea/next-docs-single-template/commit/cc7fd343e0a6c4d9cc5ccd966f240b412114f6cb))
+- **docs:** add versioned documentation system with search filtering ([1e75653](https://github.com/ArthurProjectCorrea/next-docs-single-template/commit/1e75653574178994ad5bd71c1d6a7b9bb504e6da))
+- **i18n:** add internationalization support with language switcher ([02bd598](https://github.com/ArthurProjectCorrea/next-docs-single-template/commit/02bd5983063848e7fc1a1a1455ede00fcecd2540))
+
 # 1.0.0 (2026-02-02)
 
 ### Features
