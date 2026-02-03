@@ -1,0 +1,179 @@
+---
+title: Creating Components
+description: Patterns and conventions for creating components in the project
+order: 2.1
+tags: ["components", "tutorial", "development"]
+lastUpdated: "2026-02-03"
+---
+
+## Folder Structure
+
+```
+components/
+├── ui/                  # ❌ DO NOT MODIFY — shadcn/ui primitives
+│   ├── button.tsx
+│   ├── dialog.tsx
+│   └── ...
+├── app-search.tsx       # ✅ Project components
+├── doc-sidebar.tsx
+├── doc-toc.tsx
+└── my-custom.tsx        # ✅ Your custom components
+```
+
+## Mandatory Rules
+
+### 1. Never add code to `components/ui/`
+
+The `ui/` folder contains third-party primitives (shadcn/ui). Modifications break updates.
+
+```tsx
+// ❌ WRONG: Modify components/ui/button.tsx
+export function Button({ children, withIcon, ...props }) {
+  // Custom logic here
+}
+
+// ✅ CORRECT: Create wrapper in components/
+// components/icon-button.tsx
+import { Button } from '@/components/ui/button';
+
+export function IconButton({ icon, children, ...props }) {
+  return (
+    <Button {...props}>
+      {icon}
+      {children}
+    </Button>
+  );
+}
+```
+
+### 2. Separate UI from Logic
+
+Components should focus on **rendering**. Logic goes to `hooks/` or `lib/`.
+
+```tsx
+// ❌ WRONG: Logic embedded in component
+function MyComponent() {
+  const [data, setData] = useState([]);
+  
+  useEffect(() => {
+    // 50 lines of fetch, transformation logic, etc.
+  }, []);
+  
+  const processData = (items) => {
+    // 30 lines of processing
+  };
+  
+  return <div>{/* UI */}</div>;
+}
+
+// ✅ CORRECT: Logic extracted
+// hooks/use-my-data.ts
+export function useMyData() {
+  const [data, setData] = useState([]);
+  useEffect(() => { /* fetch */ }, []);
+  return data;
+}
+
+// lib/data-utils.ts
+export function processData(items) {
+  // pure transformation
+}
+
+// components/my-component.tsx
+import { useMyData } from '@/hooks/use-my-data';
+import { processData } from '@/lib/data-utils';
+
+function MyComponent() {
+  const data = useMyData();
+  const processed = processData(data);
+  return <div>{/* UI with processed */}</div>;
+}
+```
+
+### 3. Use Absolute Imports
+
+Always use the `@/` alias for imports.
+
+```tsx
+// ❌ WRONG
+import { Button } from '../../../components/ui/button';
+
+// ✅ CORRECT
+import { Button } from '@/components/ui/button';
+import { useMyHook } from '@/hooks/use-my-hook';
+import { myUtil } from '@/lib/my-utils';
+import type { MyType } from '@/types/my-types';
+```
+
+### 4. Define Types in `types/`
+
+Shared interfaces are centralized.
+
+```tsx
+// ❌ WRONG: Inline types in component
+interface SearchResult {
+  title: string;
+  url: string;
+}
+
+function Search() {
+  const [results, setResults] = useState<SearchResult[]>([]);
+}
+
+// ✅ CORRECT: Types in dedicated file
+// types/search.ts
+export interface SearchResult {
+  title: string;
+  url: string;
+}
+
+// components/search.tsx
+import type { SearchResult } from '@/types/search';
+```
+
+## Component Anatomy
+
+```tsx
+'use client'; // Only if using hooks/state
+
+import * as React from 'react';
+
+// 1. External imports
+import { SomeIcon } from 'lucide-react';
+
+// 2. Internal imports: lib, hooks, types
+import { cn } from '@/lib/utils';
+import { useMyHook } from '@/hooks/use-my-hook';
+import type { MyType } from '@/types/my-type';
+
+// 3. UI imports (last)
+import { Button } from '@/components/ui/button';
+
+// 4. Interface (if needed)
+interface MyComponentProps {
+  title: string;
+  onAction?: () => void;
+}
+
+// 5. Component
+export function MyComponent({ title, onAction }: MyComponentProps) {
+  const data = useMyHook();
+  
+  return (
+    <div className="...">
+      <h2>{title}</h2>
+      <Button onClick={onAction}>Action</Button>
+    </div>
+  );
+}
+```
+
+## Checklist
+
+Before creating a component:
+
+- [ ] Does a similar one already exist in `components/ui/`?
+- [ ] Can I compose existing components?
+- [ ] Is the logic in hooks/lib?
+- [ ] Are types in `types/`?
+- [ ] Am I using absolute imports?

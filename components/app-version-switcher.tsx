@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Check, ChevronsUpDown, Sparkles, Archive } from 'lucide-react';
 
 import type { VersionInfo } from '@/types/sidebar';
+import type { Locale } from '@/lib/i18n';
 
 import {
   DropdownMenu,
@@ -21,9 +22,11 @@ import {
 export function VersionSwitcher({
   versionsInfo,
   currentVersionInfo,
+  locale,
 }: {
   versionsInfo: VersionInfo[];
   currentVersionInfo: VersionInfo;
+  locale: Locale;
 }) {
   const router = useRouter();
 
@@ -69,7 +72,7 @@ export function VersionSwitcher({
                 key={versionInfo.name}
                 onSelect={() => {
                   const slug = getVersionSlug(versionInfo);
-                  router.push(`/docs/${slug}`);
+                  router.push(`/${locale}/docs/${slug}`);
                 }}
                 className="flex items-center gap-2"
               >

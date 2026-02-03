@@ -1,0 +1,66 @@
+{
+  "common": {
+    "search": "Search",
+    "searchPlaceholder": "Search documentation...",
+    "searchNoResults": "No results found",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "notFound": "Page not found",
+    "backToHome": "Back to home",
+    "language": "Language",
+    "theme": "Theme",
+    "lightMode": "Light",
+    "darkMode": "Dark",
+    "systemMode": "System"
+  },
+  "navigation": {
+    "home": "Home",
+    "docs": "Documentation",
+    "blog": "Blog",
+    "about": "About",
+    "contact": "Contact",
+    "getStarted": "Get Started"
+  },
+  "docs": {
+    "tableOfContents": "On this page",
+    "previousPage": "Previous",
+    "nextPage": "Next",
+    "editOnGitHub": "Edit on GitHub",
+    "lastUpdated": "Last updated",
+    "version": "Version",
+    "filterByVersion": "Filter by version",
+    "searchInVersion": "Search in current version",
+    "allVersions": "All versions"
+  },
+  "home": {
+    "title": "Next Docs Template",
+    "subtitle": "A modern documentation template built with Next.js, Fumadocs, and shadcn/ui",
+    "getStarted": "Get Started",
+    "viewOnGitHub": "View on GitHub",
+    "features": {
+      "title": "Features",
+      "versioning": "Versioned Documentation",
+      "versioningDesc": "Support multiple versions of your documentation",
+      "search": "Full-text Search",
+      "searchDesc": "Fast and accurate search across all documentation",
+      "darkMode": "Dark Mode",
+      "darkModeDesc": "Beautiful dark mode out of the box",
+      "mdx": "MDX Support",
+      "mdxDesc": "Write documentation with MDX components"
+    }
+  },
+  "footer": {
+    "copyright": "© {year} Next Docs Template. All rights reserved.",
+    "builtWith": "Built with"
+  },
+  "errors": {
+    "404": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist or has been moved."
+    },
+    "500": {
+      "title": "Server error",
+      "description": "Something went wrong on our end. Please try again later."
+    }
+  }
+}

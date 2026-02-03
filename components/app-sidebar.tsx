@@ -12,12 +12,22 @@ import {
   SheetClose,
 } from '@/components/ui/sheet';
 import Link from 'next/link';
-import navbarData from '@/database/app-navbar.json';
 import { ModeToggle } from './mode-toggle';
+import { useDictionary, useLocale } from '@/contexts/dictionary-context';
 
 export function AppSidebar() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const locale = useLocale();
+  const { dictionary } = useDictionary();
+
+  // Define navigation items with translations
+  const navItems = [
+    { label: dictionary.navigation.home, href: `/${locale}` },
+    { label: dictionary.navigation.docs, href: `/${locale}/docs/latest` },
+    { label: dictionary.navigation.blog, href: `/${locale}/blog` },
+    { label: dictionary.navigation.about, href: `/${locale}/about` },
+  ];
 
   return (
     <>
@@ -40,8 +50,11 @@ export function AppSidebar() {
 
           <nav className="mt-6">
             <ul className="flex flex-col gap-3">
-              {navbarData.map((item: { label: string; href: string }) => {
-                const isActive = pathname.startsWith(item.href);
+              {navItems.map((item) => {
+                const isActive =
+                  item.href === `/${locale}`
+                    ? pathname === `/${locale}` || pathname === `/${locale}/`
+                    : pathname.startsWith(item.href);
                 return (
                   <li key={item.label}>
                     <Link

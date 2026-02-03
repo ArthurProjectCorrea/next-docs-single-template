@@ -17,20 +17,24 @@ export interface PaginationData {
  * Used for navigation between pages
  * Skips folder index pages except for root /docs
  */
-function flattenPageTree(nodes: PageTreeNode[]): PaginationLink[] {
+function flattenPageTree(
+  nodes: PageTreeNode[],
+  locale?: string,
+): PaginationLink[] {
   const result: PaginationLink[] = [];
+  const localePrefix = locale ? `/${locale}` : '';
 
   for (const node of nodes) {
     if (node.type === 'page' && node.url) {
       result.push({
         title: String(node.name) || 'Untitled',
-        url: node.url,
+        url: `${localePrefix}${node.url}`,
       });
     } else if (node.type === 'folder') {
       // Skip folder index pages (except root /docs which is handled as 'page' type)
       // Only add children
       if (node.children) {
-        result.push(...flattenPageTree(node.children));
+        result.push(...flattenPageTree(node.children, locale));
       }
     }
   }
@@ -45,13 +49,20 @@ function flattenPageTree(nodes: PageTreeNode[]): PaginationLink[] {
 export function getPaginationData(
   currentUrl: string,
   version: string = 'latest',
+  locale?: string,
 ): PaginationData {
   const source = getSource(version);
   const tree = source.getPageTree();
   const sortedTree = sortPageTree(tree.children as unknown as PageTreeNode[]);
-  const flatPages = flattenPageTree(sortedTree);
+  const flatPages = flattenPageTree(sortedTree, locale);
 
-  const currentIndex = flatPages.findIndex((page) => page.url === currentUrl);
+  // Add locale prefix to current URL for comparison
+  const localePrefix = locale ? `/${locale}` : '';
+  const localizedCurrentUrl = `${localePrefix}${currentUrl}`;
+
+  const currentIndex = flatPages.findIndex(
+    (page) => page.url === localizedCurrentUrl,
+  );
 
   if (currentIndex === -1) {
     return { prev: null, next: null };

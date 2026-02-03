@@ -6,6 +6,8 @@ import { Minus, Plus } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import type { NavItem, VersionInfo } from '@/types/sidebar';
+import type { Dictionary } from '@/lib/dictionaries';
+import type { Locale } from '@/lib/i18n';
 
 import {
   Collapsible,
@@ -32,12 +34,15 @@ interface DocSidebarProps extends React.ComponentProps<typeof Sidebar> {
   navItems: NavItem[];
   versionsInfo: VersionInfo[];
   currentVersionInfo: VersionInfo;
+  locale: Locale;
+  dictionary: Dictionary;
 }
 
 export function DocSidebar({
   navItems,
   versionsInfo,
   currentVersionInfo,
+  locale,
   ...props
 }: DocSidebarProps) {
   const pathname = usePathname();
@@ -120,7 +125,7 @@ export function DocSidebar({
 
   return (
     <Sidebar
-      className="sticky top-[var(--header-height)] left-0 z-30 hidden h-[calc(100svh-var(--header-height))] overscroll-none bg-background  md:flex"
+      className="sticky top-[var(--header-height)] left-0 z-30  hidden h-[calc(100svh-var(--header-height))] overscroll-none bg-background  md:flex"
       collapsible="none"
       {...props}
     >
@@ -128,6 +133,7 @@ export function DocSidebar({
         <VersionSwitcher
           versionsInfo={versionsInfo}
           currentVersionInfo={currentVersionInfo}
+          locale={locale}
         />
       </SidebarHeader>
       <SidebarContent className="no-scrollbar overflow-x-hidden px-2">

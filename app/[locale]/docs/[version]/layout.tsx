@@ -5,25 +5,33 @@ import { getSource, getVersionInfo, getAllVersionsInfo } from '@/lib/source';
 import { sortPageTree, convertTreeToNav } from '@/lib/sidebar-utils';
 import { getVersions, versionExists } from '@/lib/source';
 import { notFound } from 'next/navigation';
+import { isValidLocale, locales, type Locale } from '@/lib/i18n';
+import { getDictionary } from '@/lib/dictionaries';
 import type { PageTreeNode, TreeNode } from '@/types/sidebar';
 
 interface DocsLayoutProps {
   children: React.ReactNode;
-  params: Promise<{ version: string }>;
+  params: Promise<{ locale: string; version: string }>;
 }
 
 export default async function DocsLayout({
   children,
   params,
 }: DocsLayoutProps) {
-  const { version } = await params;
+  const { locale, version } = await params;
 
-  // Check if version exists
-  if (!versionExists(version)) {
+  // Check if locale is valid
+  if (!isValidLocale(locale)) {
     notFound();
   }
 
-  const source = getSource(version);
+  // Check if version exists for this locale
+  if (!versionExists(version, locale)) {
+    notFound();
+  }
+
+  const dict = await getDictionary(locale as Locale);
+  const source = getSource(version, locale);
   const tree = source.getPageTree();
   const sortedTree = {
     ...tree,
@@ -34,11 +42,12 @@ export default async function DocsLayout({
   const navItems = convertTreeToNav(
     sortedTree.children as unknown as TreeNode[],
     version,
+    locale,
   );
 
-  // Get version metadata
-  const versionsInfo = getAllVersionsInfo();
-  const currentVersionInfo = getVersionInfo(version);
+  // Get version metadata for this locale
+  const versionsInfo = getAllVersionsInfo(locale);
+  const currentVersionInfo = getVersionInfo(version, locale);
 
   return (
     <div className="flex h-full w-full">
@@ -47,6 +56,8 @@ export default async function DocsLayout({
           navItems={navItems}
           versionsInfo={versionsInfo}
           currentVersionInfo={currentVersionInfo}
+          locale={locale as Locale}
+          dictionary={dict}
         />
 
         <SidebarInset
@@ -54,16 +65,24 @@ export default async function DocsLayout({
           className="flex-1 overflow-y-auto flex justify-center items-center"
           style={{ scrollPaddingTop: '1.5rem' }}
         >
-          <div className="w-full max-w-3xl px-8 py-8">{children}</div>
+          <div className="w-full max-w-3xl py-6">{children}</div>
         </SidebarInset>
 
-        <DocToc />
+        <DocToc dictionary={dict} />
       </SidebarProvider>
     </div>
   );
 }
 
 export function generateStaticParams() {
-  const versions = getVersions();
-  return versions.map((version) => ({ version }));
+  const allParams: { locale: string; version: string }[] = [];
+
+  for (const locale of locales) {
+    const versions = getVersions(locale);
+    for (const version of versions) {
+      allParams.push({ locale, version });
+    }
+  }
+
+  return allParams;
 }

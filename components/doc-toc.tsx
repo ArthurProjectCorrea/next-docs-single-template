@@ -10,6 +10,7 @@ import { useToc } from '@/hooks/use-toc';
 import { useScrollProgress } from '@/hooks/use-scroll-progress';
 import { useHashHighlight } from '@/hooks/use-hash-highlight';
 import type { TOCItem as TOCItemType } from '@/types/global';
+import type { Dictionary } from '@/lib/dictionaries';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -30,11 +31,13 @@ function DocsTableOfContents({
   variant = 'list',
   className,
   onNavigate,
+  dictionary,
 }: {
   toc: TOCItemType[];
   variant?: 'dropdown' | 'list';
   className?: string;
   onNavigate?: (url: string) => void;
+  dictionary?: Dictionary;
 }) {
   const [open, setOpen] = React.useState(false);
 
@@ -48,6 +51,8 @@ function DocsTableOfContents({
     onNavigate?.(url);
   };
 
+  const tocLabel = dictionary?.docs.tableOfContents || 'On this page';
+
   if (variant === 'dropdown') {
     return (
       <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -57,7 +62,7 @@ function DocsTableOfContents({
             size="sm"
             className={cn('h-8 md:h-7', className)}
           >
-            <Menu /> On This Page
+            <Menu /> {tocLabel}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
@@ -89,7 +94,7 @@ function DocsTableOfContents({
   return (
     <div className={cn('flex flex-col gap-2 p-4 pt-0 text-sm', className)}>
       <p className="text-muted-foreground bg-background sticky top-0 h-6 text-xs font-medium">
-        Índice
+        {tocLabel}
       </p>
       {toc.map((item) => (
         <TOCItem
@@ -106,7 +111,10 @@ function DocsTableOfContents({
   );
 }
 
-export function DocToc({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function DocToc({
+  dictionary,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { dictionary?: Dictionary }) {
   // Use extracted hooks for state management
   const toc = useToc();
   const progress = useScrollProgress({ containerId: 'docs-content' });
@@ -116,7 +124,7 @@ export function DocToc({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar
-      className="sticky top-[var(--header-height)] right-0 z-30 hidden h-[calc(100svh-var(--header-height))] overscroll-none bg-background xl:flex"
+      className="sticky top-[var(--header-height)]  right-0 z-30 hidden h-[calc(100svh-var(--header-height))] overscroll-none bg-background xl:flex"
       collapsible="none"
       {...props}
     >
@@ -125,10 +133,13 @@ export function DocToc({ ...props }: React.ComponentProps<typeof Sidebar>) {
           className="absolute right-0 top-0 bottom-0 w-1 bg-primary rounded-full transition-all duration-300"
           style={{ height: `${progress}%` }}
         />
-        <div className="from-background via-background/80 to-background/50 sticky -top-1 z-10 h-8 shrink-0 bg-linear-to-b blur-xs" />
         <SidebarGroup>
           <AnchorProvider toc={toc}>
-            <DocsTableOfContents toc={toc} variant="list" />
+            <DocsTableOfContents
+              toc={toc}
+              variant="list"
+              dictionary={dictionary}
+            />
           </AnchorProvider>
         </SidebarGroup>
         <div className="from-background via-background/80 to-background/50 sticky -bottom-1 z-10 h-16 shrink-0 bg-linear-to-t blur-xs" />

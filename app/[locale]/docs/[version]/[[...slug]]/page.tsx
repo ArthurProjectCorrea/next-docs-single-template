@@ -7,6 +7,8 @@ import { PageContent } from '@/contexts/page-content';
 import { DocHeader } from '@/components/doc-header';
 import { DocPagination } from '@/components/doc-pagination';
 import { getPaginationData } from '@/lib/pagination-utils';
+import { isValidLocale, locales, type Locale } from '@/lib/i18n';
+import { getDictionary } from '@/lib/dictionaries';
 import type { TOCItem } from '@/types/global';
 import type { MDXContent } from 'mdx/types';
 
@@ -14,59 +16,74 @@ interface PageData {
   title?: string;
   description?: string;
   tags?: string[];
+  lastUpdated?: string;
   body: MDXContent;
   toc: TOCItem[];
 }
 
 interface PageProps {
-  params: Promise<{ version: string; slug?: string[] }>;
+  params: Promise<{ locale: string; version: string; slug?: string[] }>;
 }
 
 export default async function Page({ params }: PageProps) {
-  const { version, slug } = await params;
+  const { locale, version, slug } = await params;
 
-  if (!versionExists(version)) {
+  if (!isValidLocale(locale)) {
     notFound();
   }
 
-  const source = getSource(version);
+  if (!versionExists(version, locale)) {
+    notFound();
+  }
+
+  const dict = await getDictionary(locale as Locale);
+  const source = getSource(version, locale);
   const page = source.getPage(slug);
   if (!page) notFound();
 
   const data = page.data as unknown as PageData;
   const MDX = data.body;
-  const pagination = getPaginationData(page.url, version);
+  const pagination = getPaginationData(page.url, version, locale);
   const tree = source.getPageTree();
 
   return (
     <PageContent toc={data.toc}>
-      <div className="prose prose-lg max-w-none">
+      <div className="prose prose-lg max-w-none ">
         <DocHeader
           title={data.title}
           description={data.description}
           tags={data.tags}
+          lastUpdated={data.lastUpdated}
           pagination={pagination}
           tree={tree}
+          locale={locale as Locale}
         />
         <MDX components={components} />
-        <DocPagination pagination={pagination} variant="full" />
+        <DocPagination
+          pagination={pagination}
+          variant="full"
+          dictionary={dict}
+        />
       </div>
     </PageContent>
   );
 }
 
 export function generateStaticParams() {
-  const versions = getVersions();
-  const allParams: { version: string; slug?: string[] }[] = [];
+  const allParams: { locale: string; version: string; slug?: string[] }[] = [];
 
-  for (const version of versions) {
-    const source = getSource(version);
-    const pages = source.generateParams();
-    for (const page of pages) {
-      allParams.push({
-        version,
-        slug: page.slug,
-      });
+  for (const locale of locales) {
+    const versions = getVersions(locale);
+    for (const version of versions) {
+      const source = getSource(version, locale);
+      const pages = source.generateParams();
+      for (const page of pages) {
+        allParams.push({
+          locale,
+          version,
+          slug: page.slug,
+        });
+      }
     }
   }
 
@@ -76,13 +93,13 @@ export function generateStaticParams() {
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const { version, slug } = await params;
+  const { locale, version, slug } = await params;
 
-  if (!versionExists(version)) {
+  if (!isValidLocale(locale) || !versionExists(version, locale)) {
     return { title: 'Not Found' };
   }
 
-  const source = getSource(version);
+  const source = getSource(version, locale);
   const page = source.getPage(slug);
   if (!page) {
     return { title: 'Not Found' };

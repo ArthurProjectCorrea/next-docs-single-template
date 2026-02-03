@@ -2,25 +2,30 @@ import { docs } from 'fumadocs-mdx:collections/server';
 import { loader } from 'fumadocs-core/source';
 import type { VersionInfo } from '@/types/sidebar';
 
+// Supported locales
+const SUPPORTED_LOCALES = ['en', 'pt'] as const;
+
 /**
- * Gets all available documentation versions dynamically from content/docs folder structure
- * Extracts version names from the first path segment of each document
+ * Gets all available documentation versions for a specific locale
+ * Extracts version names from the second path segment of each document
  *
- * Structure: Each top-level folder in content/docs/ is treated as a version
- * - content/docs/latest/ -> 'latest'
- * - content/docs/v1/ -> 'v1'
+ * Structure: Each top-level folder in content/docs/{locale}/ is treated as a version
+ * - content/docs/en/latest/ -> 'latest'
+ * - content/docs/pt/v1/ -> 'v1'
  */
-export function getVersions(): string[] {
+export function getVersions(locale: string = 'en'): string[] {
   const allDocs = docs.toFumadocsSource();
 
-  // Extract unique version names from the first segment of each file path
+  // Extract unique version names from paths matching the locale
   const versionsSet = new Set<string>();
 
   for (const file of allDocs.files) {
     const filePath = file.path || '';
-    const firstSegment = filePath.split('/')[0];
-    if (firstSegment) {
-      versionsSet.add(firstSegment);
+    const segments = filePath.split('/');
+
+    // Check if first segment matches locale
+    if (segments[0] === locale && segments[1]) {
+      versionsSet.add(segments[1]);
     }
   }
 
@@ -35,18 +40,18 @@ export function getVersions(): string[] {
 }
 
 /**
- * Checks if a version exists in the documentation
+ * Checks if a version exists in the documentation for a specific locale
  */
-export function versionExists(version: string): boolean {
-  const versions = getVersions();
+export function versionExists(version: string, locale: string = 'en'): boolean {
+  const versions = getVersions(locale);
   return versions.includes(version);
 }
 
 /**
  * Gets the default version (always 'latest', or first available if 'latest' doesn't exist)
  */
-export function getDefaultVersion(): string {
-  const versions = getVersions();
+export function getDefaultVersion(locale: string = 'en'): string {
+  const versions = getVersions(locale);
   if (versions.includes('latest')) {
     return 'latest';
   }
@@ -54,22 +59,23 @@ export function getDefaultVersion(): string {
 }
 
 /**
- * Creates a source loader for a specific version
- * Filters pages to only include those from the specified version folder
+ * Creates a source loader for a specific version and locale
+ * Filters pages to only include those from the specified locale/version folder
  */
-export function createVersionedSource(version: string) {
+export function createVersionedSource(version: string, locale: string = 'en') {
   const allDocs = docs.toFumadocsSource();
+  const prefix = `${locale}/${version}`;
 
-  // Filter to only include pages from this version
+  // Filter to only include pages from this locale/version
   const versionedPages = allDocs.files.filter((file) => {
     const filePath = file.path || '';
-    return filePath.startsWith(`${version}/`) || filePath === version;
+    return filePath.startsWith(`${prefix}/`) || filePath === prefix;
   });
 
-  // Transform paths to remove version prefix for URL generation
+  // Transform paths to remove locale/version prefix for URL generation
   const transformedPages = versionedPages.map((file) => ({
     ...file,
-    path: file.path?.replace(`${version}/`, '') || '',
+    path: file.path?.replace(`${prefix}/`, '') || '',
   }));
 
   return loader({
@@ -82,34 +88,60 @@ export function createVersionedSource(version: string) {
 }
 
 /**
- * Gets source for a specific version
+ * Gets source for a specific version and locale
  */
-export function getSource(version: string) {
-  return createVersionedSource(version);
+export function getSource(version: string, locale: string = 'en') {
+  return createVersionedSource(version, locale);
 }
 
 /**
- * Default source for backwards compatibility (uses 'latest')
+ * Default source for backwards compatibility (uses 'latest' and 'en')
  */
-export const source = createVersionedSource('latest');
+export const source = createVersionedSource('latest', 'en');
 
 /**
- * Gets all sources for all versions
+ * Gets all sources for all versions and locales
  */
-export function getAllSources() {
-  const versions = getVersions();
-  return versions.map((version) => ({
-    version,
-    source: createVersionedSource(version),
-  }));
+export function getAllSources(locale?: string) {
+  if (locale) {
+    const versions = getVersions(locale);
+    return versions.map((version) => ({
+      version,
+      locale,
+      source: createVersionedSource(version, locale),
+    }));
+  }
+
+  // Return sources for all locales
+  const allSources: {
+    version: string;
+    locale: string;
+    source: ReturnType<typeof createVersionedSource>;
+  }[] = [];
+
+  for (const loc of SUPPORTED_LOCALES) {
+    const versions = getVersions(loc);
+    for (const version of versions) {
+      allSources.push({
+        version,
+        locale: loc,
+        source: createVersionedSource(version, loc),
+      });
+    }
+  }
+
+  return allSources;
 }
 
 /**
  * Gets version metadata from the index page of a version folder
  * Returns version number from frontmatter and computed display name
  */
-export function getVersionInfo(version: string): VersionInfo {
-  const source = getSource(version);
+export function getVersionInfo(
+  version: string,
+  locale: string = 'en',
+): VersionInfo {
+  const source = getSource(version, locale);
   const indexPage = source.getPage([]);
 
   const data = indexPage?.data as { version?: string } | undefined;
@@ -129,9 +161,9 @@ export function getVersionInfo(version: string): VersionInfo {
 }
 
 /**
- * Gets version info for all available versions
+ * Gets version info for all available versions in a locale
  */
-export function getAllVersionsInfo(): VersionInfo[] {
-  const versions = getVersions();
-  return versions.map((version) => getVersionInfo(version));
+export function getAllVersionsInfo(locale: string = 'en'): VersionInfo[] {
+  const versions = getVersions(locale);
+  return versions.map((version) => getVersionInfo(version, locale));
 }

@@ -1,0 +1,66 @@
+{
+  "common": {
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar documentação...",
+    "searchNoResults": "Nenhum resultado encontrado",
+    "loading": "Carregando...",
+    "error": "Ocorreu um erro",
+    "notFound": "Página não encontrada",
+    "backToHome": "Voltar ao início",
+    "language": "Idioma",
+    "theme": "Tema",
+    "lightMode": "Claro",
+    "darkMode": "Escuro",
+    "systemMode": "Sistema"
+  },
+  "navigation": {
+    "home": "Início",
+    "docs": "Documentação",
+    "blog": "Blog",
+    "about": "Sobre",
+    "contact": "Contato",
+    "getStarted": "Começar"
+  },
+  "docs": {
+    "tableOfContents": "Nesta página",
+    "previousPage": "Anterior",
+    "nextPage": "Próximo",
+    "editOnGitHub": "Editar no GitHub",
+    "lastUpdated": "Última atualização",
+    "version": "Versão",
+    "filterByVersion": "Filtrar por versão",
+    "searchInVersion": "Buscar na versão atual",
+    "allVersions": "Todas as versões"
+  },
+  "home": {
+    "title": "Next Docs Template",
+    "subtitle": "Um template moderno de documentação construído com Next.js, Fumadocs e shadcn/ui",
+    "getStarted": "Começar",
+    "viewOnGitHub": "Ver no GitHub",
+    "features": {
+      "title": "Recursos",
+      "versioning": "Documentação Versionada",
+      "versioningDesc": "Suporte a múltiplas versões da sua documentação",
+      "search": "Busca Completa",
+      "searchDesc": "Busca rápida e precisa em toda a documentação",
+      "darkMode": "Modo Escuro",
+      "darkModeDesc": "Modo escuro elegante incluído",
+      "mdx": "Suporte a MDX",
+      "mdxDesc": "Escreva documentação com componentes MDX"
+    }
+  },
+  "footer": {
+    "copyright": "© {year} Next Docs Template. Todos os direitos reservados.",
+    "builtWith": "Construído com"
+  },
+  "errors": {
+    "404": {
+      "title": "Página não encontrada",
+      "description": "A página que você procura não existe ou foi movida."
+    },
+    "500": {
+      "title": "Erro no servidor",
+      "description": "Algo deu errado do nosso lado. Por favor, tente novamente mais tarde."
+    }
+  }
+}

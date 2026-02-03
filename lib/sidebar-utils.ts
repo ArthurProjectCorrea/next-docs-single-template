@@ -32,11 +32,17 @@ function extractVersionFromUrl(url: string): string {
  *
  * @param tree - Array of tree nodes from the documentation structure
  * @param version - The documentation version
+ * @param locale - The current locale (optional)
  * @returns Array of navigation items ready for rendering
  */
-export function convertTreeToNav(tree: TreeNode[], version: string): NavItem[] {
+export function convertTreeToNav(
+  tree: TreeNode[],
+  version: string,
+  locale?: string,
+): NavItem[] {
   const result: NavItem[] = [];
   const source = getSource(version);
+  const localePrefix = locale ? `/${locale}` : '';
 
   tree.forEach((node) => {
     let defaultOpen = false;
@@ -60,11 +66,14 @@ export function convertTreeToNav(tree: TreeNode[], version: string): NavItem[] {
       group = data?.group;
     }
 
+    // Add locale prefix to URLs
+    const localizedUrl = node.url ? `${localePrefix}${node.url}` : undefined;
+
     result.push({
       title: String(node.name) || 'Untitled',
-      url: node.url,
+      url: localizedUrl,
       items: node.children
-        ? convertTreeToNav(node.children, version)
+        ? convertTreeToNav(node.children, version, locale)
         : undefined,
       defaultOpen,
       id: node.$id,

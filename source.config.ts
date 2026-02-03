@@ -12,6 +12,7 @@ export const docs = defineDocs({
       order: z.number().optional(),
       tags: z.array(z.string()).optional(),
       version: z.string().optional(),
+      lastUpdated: z.string().optional(),
     }),
   },
 });

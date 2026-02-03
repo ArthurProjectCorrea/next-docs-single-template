@@ -1,0 +1,128 @@
+---
+title: Search
+description: Global search component for documentation
+order: 3.3
+tags: ["search", "navigation"]
+lastUpdated: "2026-02-03"
+---
+
+## Basic Usage
+
+```tsx
+import { AppSearch } from '@/components/app-search';
+
+// In header or navbar
+<AppSearch />
+```
+
+## Architecture
+
+```
+components/app-search.tsx    # UI (dialog, input, results)
+hooks/use-search-keyboard.ts # Ctrl+K shortcut hook
+lib/search-utils.ts          # Processing functions
+types/search.ts              # Interfaces
+```
+
+## File Structure
+
+### `types/search.ts`
+
+Defines result interfaces:
+
+```tsx
+export interface SearchMatch {
+  content: string;
+  url: string;
+}
+
+export interface SearchSection {
+  heading: string;
+  matches: SearchMatch[];
+}
+
+export interface SearchResultGroup {
+  pageTitle: string;
+  pageUrl: string;
+  sections: SearchSection[];
+}
+```
+
+### `lib/search-utils.ts`
+
+Pure processing functions:
+
+| Function | Description |
+|----------|-------------|
+| `parseHighlightParts()` | Separates text into parts for highlighting |
+| `truncateWithContext()` | Truncates text keeping match context |
+| `formatHashToTitle()` | Converts URL hash to readable title |
+| `isRelevantResult()` | Filters results by relevance |
+| `calculateRelevanceScore()` | Calculates score for sorting |
+| `groupSearchResults()` | Groups results by page |
+
+### `hooks/use-search-keyboard.ts`
+
+Keyboard shortcut hook:
+
+```tsx
+import { useSearchKeyboard } from '@/hooks/use-search-keyboard';
+
+function MySearch() {
+  const [open, setOpen] = useState(false);
+  
+  useSearchKeyboard({
+    onToggle: () => setOpen((prev) => !prev),
+    key: 'k',        // Optional, default: 'k'
+    enabled: true,   // Optional, default: true
+  });
+}
+```
+
+## Customizations
+
+### Change Keyboard Shortcut
+
+Modify the hook in the component:
+
+```tsx
+// components/app-search.tsx
+useSearchKeyboard({
+  onToggle: React.useCallback(() => setOpen((prev) => !prev), []),
+  key: '/', // Changes to Ctrl+/
+});
+```
+
+### Change Placeholder
+
+In the component, locate the `Input`:
+
+```tsx
+<Input
+  placeholder="Search documentation..." // Change here
+  // ...
+/>
+```
+
+## API
+
+### AppSearch Props
+
+The component receives no props — it's self-contained.
+
+### useSearchKeyboard Hook
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `onToggle` | `() => void` | — | Callback when shortcut is pressed |
+| `key` | `string` | `'k'` | Shortcut key |
+| `enabled` | `boolean` | `true` | Whether shortcut is active |
+
+## Dependencies
+
+- `fumadocs-core/search/client` — `useDocsSearch` hook
+- `@/components/ui/dialog` — Modal
+- `@/components/ui/input` — Search field
+- `@/components/ui/scroll-area` — Scroll area
+- `@/components/ui/kbd` — Key indicators
+- `@/components/ui/spinner` — Loading

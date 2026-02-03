@@ -1,6 +1,22 @@
 import Image from 'next/image';
+import Link from 'next/link';
+import { getDictionary } from '@/lib/dictionaries';
+import { isValidLocale, type Locale } from '@/lib/i18n';
+import { notFound } from 'next/navigation';
 
-export default function Home() {
+interface HomePageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export default async function HomePage({ params }: HomePageProps) {
+  const { locale } = await params;
+
+  if (!isValidLocale(locale)) {
+    notFound();
+  }
+
+  const dict = await getDictionary(locale as Locale);
+
   return (
     <div className="flex flex-1 items-center justify-center bg-muted font-sans">
       <main className="flex w-full max-w-3xl flex-col items-center justify-between px-6 py-16 sm:items-start sm:px-12 md:px-16 md:py-32">
@@ -14,49 +30,26 @@ export default function Home() {
         />
         <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-foreground">
-            To get started, edit the page.tsx file.
+            {dict.home.title}
           </h1>
           <p className="max-w-md text-lg leading-8 text-muted-foreground">
-            Looking for a starting point or more instructions? Head over to{' '}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-foreground"
-            >
-              Templates
-            </a>{' '}
-            or the{' '}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-foreground"
-            >
-              Learning
-            </a>{' '}
-            center.
+            {dict.home.subtitle}
           </p>
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
+          <Link
             className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-primary px-5 text-primary-foreground transition-colors hover:bg-primary/90 md:w-40"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`/${locale}/docs/latest`}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
+            {dict.home.getStarted}
+          </Link>
           <a
             className="flex h-12 w-full items-center justify-center rounded-full border border-border px-5 transition-colors hover:border-transparent hover:bg-accent md:w-40"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="https://github.com/your-repo/next-docs-template"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Documentation
+            {dict.home.viewOnGitHub}
           </a>
         </div>
       </main>

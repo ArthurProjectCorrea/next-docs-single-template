@@ -11,7 +11,8 @@ var docs = defineDocs({
       group: z.string().optional(),
       order: z.number().optional(),
       tags: z.array(z.string()).optional(),
-      version: z.string().optional()
+      version: z.string().optional(),
+      lastUpdated: z.string().optional()
     })
   }
 });

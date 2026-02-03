@@ -2,10 +2,12 @@ import Link from 'next/link';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { PaginationData } from '@/lib/pagination-utils';
+import type { Dictionary } from '@/lib/dictionaries';
 
 interface DocPaginationProps {
   pagination: PaginationData;
   variant?: 'mini' | 'full';
+  dictionary?: Dictionary;
 }
 
 export function DocPagination({

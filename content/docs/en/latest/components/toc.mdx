@@ -1,0 +1,150 @@
+---
+title: TOC
+description: Table of Contents component
+order: 3.1
+tags: ["toc", "index", "navigation"]
+lastUpdated: "2026-02-03"
+---
+
+## Basic Usage
+
+```tsx
+import { DocToc } from '@/components/doc-toc';
+
+// In layout.tsx
+<DocToc />
+```
+
+The TOC is automatically fed by the `PageContent` context.
+
+## Architecture
+
+```
+components/doc-toc.tsx       # UI (sidebar, dropdown, links)
+hooks/use-toc.ts             # TOC state via window.toc
+hooks/use-scroll-progress.ts # Scroll progress
+hooks/use-hash-highlight.ts  # Highlight on load with hash
+lib/toc-utils.ts             # Navigation functions
+types/global.d.ts            # TOCItem interface
+```
+
+## File Structure
+
+### `types/global.d.ts`
+
+Defines the TOC item interface:
+
+```tsx
+export interface TOCItem {
+  title: ReactNode;
+  url: string;   // E.g., "#getting-started"
+  depth: number; // 2, 3, 4 (h2, h3, h4)
+}
+
+declare global {
+  interface Window {
+    toc?: TOCItem[];
+  }
+}
+```
+
+### `hooks/use-toc.ts`
+
+Hook for TOC state:
+
+```tsx
+import { useToc } from '@/hooks/use-toc';
+
+function MyComponent() {
+  const toc = useToc(); // TOCItem[]
+  // Automatically reacts to page changes
+}
+```
+
+### `hooks/use-scroll-progress.ts`
+
+Hook for scroll tracking:
+
+```tsx
+import { useScrollProgress } from '@/hooks/use-scroll-progress';
+
+function MyComponent() {
+  const progress = useScrollProgress({ 
+    containerId: 'docs-content' 
+  });
+  // progress = 0-100 (percentage)
+}
+```
+
+### `hooks/use-hash-highlight.ts`
+
+Hook for highlighting on URL hash load:
+
+```tsx
+import { useHashHighlight } from '@/hooks/use-hash-highlight';
+
+function MyComponent() {
+  useHashHighlight({
+    delay: 100,    // Optional, default: 100ms
+    enabled: true, // Optional, default: true
+  });
+  // Automatically highlights #section on load
+}
+```
+
+### `lib/toc-utils.ts`
+
+Navigation functions:
+
+| Function | Description |
+|----------|-------------|
+| `highlightElement()` | Applies highlight animation |
+| `scrollToElement()` | Scrolls to element smoothly |
+| `handleTocNavigation()` | Handles TOC link click |
+
+## Customizations
+
+### Change TOC Title
+
+In `doc-toc.tsx`, the title comes from the dictionary:
+
+```tsx
+const tocLabel = dictionary?.docs.tableOfContents || 'On this page';
+```
+
+### Customize Progress Bar
+
+Modify the progress indicator styles:
+
+```tsx
+<div
+  className="absolute right-0 top-0 bottom-0 w-1 bg-primary rounded-full"
+  style={{ height: `${progress}%` }}
+/>
+```
+
+## API
+
+### DocToc Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `dictionary` | `Dictionary` | Translation dictionary |
+
+### useToc Hook
+
+Returns `TOCItem[]` — current page's table of contents.
+
+### useScrollProgress Hook
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `containerId` | `string` | — | Scroll container ID |
+
+Returns `number` — scroll percentage (0-100).
+
+## Dependencies
+
+- `fumadocs-core/toc` — `AnchorProvider`, `TOCItem`
+- `@/components/ui/sidebar` — Sidebar primitives
+- `@/components/ui/dropdown-menu` — Dropdown menu

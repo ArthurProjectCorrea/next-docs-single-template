@@ -1,0 +1,137 @@
+---
+title: Sidebar
+description: Side navigation component with page tree
+order: 3.2
+tags: ["sidebar", "navigation", "menu"]
+lastUpdated: "2026-02-03"
+---
+
+## Basic Usage
+
+```tsx
+import { AppSidebar } from '@/components/doc-sidebar';
+import { source } from '@/lib/source';
+import { sortPageTree } from '@/lib/sidebar-utils';
+import type { PageTreeNode } from '@/types/sidebar';
+
+// In layout.tsx
+const tree = source.getPageTree();
+const sortedTree = {
+  ...tree,
+  children: sortPageTree(tree.children as unknown as PageTreeNode[]),
+};
+
+<AppSidebar tree={sortedTree} />
+```
+
+## Architecture
+
+```
+components/doc-sidebar.tsx   # UI (menu, collapsible, links)
+lib/sidebar-utils.ts         # Conversion and sorting functions
+types/sidebar.ts             # Interfaces
+```
+
+## File Structure
+
+### `types/sidebar.ts`
+
+Defines tree interfaces:
+
+```tsx
+export interface TreeNode {
+  $id?: string;
+  name?: ReactNode;
+  children?: TreeNode[];
+  url?: string;
+  type?: string;
+  index?: TreeNode;
+}
+
+export interface PageTreeNode {
+  type: 'page' | 'folder';
+  name: string;
+  url?: string;
+  children?: PageTreeNode[];
+  index?: { url: string };
+  $id?: string;
+  $ref?: { file: string };
+}
+
+export interface NavItem {
+  title: string;
+  url?: string;
+  items?: NavItem[];
+  defaultOpen?: boolean;
+  id?: string;
+  group?: string;
+}
+
+export interface SidebarTree {
+  children: TreeNode[];
+}
+```
+
+### `lib/sidebar-utils.ts`
+
+Processing functions:
+
+| Function | Description |
+|----------|-------------|
+| `convertTreeToNav()` | Converts page tree to NavItems |
+| `sortPageTree()` | Sorts tree by `order`, index, alphabetical |
+
+## Customizations
+
+### Change Page Order
+
+Use the `order` frontmatter in MDX files:
+
+```mdx
+---
+title: Introduction
+order: 1
+---
+
+# Introduction
+```
+
+Pages with `order` appear first, sorted numerically.
+
+### Create Visual Groups
+
+Use the `group` frontmatter to add section labels:
+
+```mdx
+---
+title: Button
+group: Components
+order: 1
+---
+```
+
+### Expand Folders by Default
+
+Use `is_open` in the folder's index file:
+
+```mdx
+---
+title: Components
+is_open: true
+---
+```
+
+## API
+
+### DocSidebar Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `navItems` | `NavItem[]` | Navigation items array |
+| `versionsInfo` | `VersionInfo[]` | Available versions |
+| `currentVersionInfo` | `VersionInfo` | Current version info |
+
+## Dependencies
+
+- `@/components/ui/sidebar` — Sidebar primitives
+- `@/components/ui/collapsible` — Collapsible sections

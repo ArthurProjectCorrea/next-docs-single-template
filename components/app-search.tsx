@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { groupSearchResults, parseHighlightParts } from '@/lib/search-utils';
 import { useSearchKeyboard } from '@/hooks/use-search-keyboard';
 import type { SearchResultGroup } from '@/types/search';
+import { useDictionary } from '@/contexts/dictionary-context';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -60,13 +61,17 @@ export function AppSearch() {
     'current',
   );
   const pathname = usePathname();
+  const { locale, dictionary } = useDictionary();
+
+  // Use locale-specific search API
   const { search, setSearch, query } = useDocsSearch({
     type: 'fetch',
+    api: `/api/search?locale=${locale}`,
   });
 
-  // Extract current version from URL (e.g., /docs/latest/... -> 'latest')
+  // Extract current version from URL (e.g., /en/docs/latest/... -> 'latest')
   const currentVersion = React.useMemo(() => {
-    const match = pathname.match(/^\/docs\/([^/]+)/);
+    const match = pathname.match(/^\/[^/]+\/docs\/([^/]+)/);
     return match ? match[1] : 'latest';
   }, [pathname]);
 
@@ -80,8 +85,8 @@ export function AppSearch() {
     return results.filter((result) => {
       const url = result.url || '';
       return (
-        url.startsWith(`/docs/${currentVersion}/`) ||
-        url === `/docs/${currentVersion}`
+        url.includes(`/docs/${currentVersion}/`) ||
+        url.endsWith(`/docs/${currentVersion}`)
       );
     });
   }, [query.data, versionFilter, currentVersion]);
@@ -138,10 +143,10 @@ export function AppSearch() {
             variant="outline"
           >
             <ToggleGroupItem value="current" className="text-xs">
-              Versão atual
+              {dictionary.docs.searchInVersion}
             </ToggleGroupItem>
             <ToggleGroupItem value="all" className="text-xs">
-              Todas as versões
+              {dictionary.docs.allVersions}
             </ToggleGroupItem>
           </ToggleGroup>
           <Badge variant="secondary" className="text-xs">
@@ -154,7 +159,7 @@ export function AppSearch() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search documentation..."
+            placeholder={dictionary.common.searchPlaceholder}
             className="h-12 px-2 border-0 shadow-none focus-visible:ring-0"
           />
           {query.isLoading && <Spinner className="size-4" />}

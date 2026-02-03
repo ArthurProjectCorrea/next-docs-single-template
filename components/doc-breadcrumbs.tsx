@@ -11,6 +11,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
+import type { Locale } from '@/lib/i18n';
+import { useDictionary } from '@/contexts/dictionary-context';
 
 interface PageTreeNode {
   type: 'page' | 'folder';
@@ -24,6 +26,7 @@ interface DocBreadcrumbsProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   tree: any; // PageTree.Root
   pageTitle?: string; // Título da página atual
+  locale?: Locale;
 }
 
 // Helper para encontrar se um URL é um index (pasta)
@@ -45,17 +48,30 @@ function isIndexUrl(url: string | undefined, tree: PageTreeNode): boolean {
   return findNode(tree, url);
 }
 
-export function DocBreadcrumbs({ tree, pageTitle }: DocBreadcrumbsProps) {
+export function DocBreadcrumbs({
+  tree,
+  pageTitle,
+  locale,
+}: DocBreadcrumbsProps) {
   const pathname = usePathname();
   const items = useBreadcrumb(pathname, tree);
+  const { dictionary } = useDictionary();
 
-  // Adicionar Home no início
-  const homeItem = { name: 'Home', url: '/' };
+  // Adicionar Home no início with locale prefix
+  const localePrefix = locale ? `/${locale}` : '';
+  const homeItem = {
+    name: dictionary.navigation.home,
+    url: localePrefix || '/',
+  };
 
   // Remover URLs dos itens que são index (pastas)
   const modifiedItems = items.map((item) => {
     const isIndex = isIndexUrl(item.url, tree);
-    return isIndex ? { ...item, url: undefined } : item;
+    // Add locale prefix to URLs
+    const localizedUrl = item.url ? `${localePrefix}${item.url}` : undefined;
+    return isIndex
+      ? { ...item, url: undefined }
+      : { ...item, url: localizedUrl };
   });
 
   // Adicionar a página atual ao final se houver pageTitle e não for um index
