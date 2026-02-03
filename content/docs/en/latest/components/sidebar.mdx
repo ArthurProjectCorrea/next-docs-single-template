@@ -2,8 +2,8 @@
 title: Sidebar
 description: Side navigation component with page tree
 order: 3.2
-tags: ["sidebar", "navigation", "menu"]
-lastUpdated: "2026-02-03"
+tags: ['sidebar', 'navigation', 'menu']
+lastUpdated: '2026-02-03'
 ---
 
 ## Basic Usage
@@ -21,7 +21,7 @@ const sortedTree = {
   children: sortPageTree(tree.children as unknown as PageTreeNode[]),
 };
 
-<AppSidebar tree={sortedTree} />
+<AppSidebar tree={sortedTree} />;
 ```
 
 ## Architecture
@@ -76,10 +76,10 @@ export interface SidebarTree {
 
 Processing functions:
 
-| Function | Description |
-|----------|-------------|
-| `convertTreeToNav()` | Converts page tree to NavItems |
-| `sortPageTree()` | Sorts tree by `order`, index, alphabetical |
+| Function             | Description                                |
+| -------------------- | ------------------------------------------ |
+| `convertTreeToNav()` | Converts page tree to NavItems             |
+| `sortPageTree()`     | Sorts tree by `order`, index, alphabetical |
 
 ## Customizations
 
@@ -125,11 +125,11 @@ is_open: true
 
 ### DocSidebar Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `navItems` | `NavItem[]` | Navigation items array |
-| `versionsInfo` | `VersionInfo[]` | Available versions |
-| `currentVersionInfo` | `VersionInfo` | Current version info |
+| Prop                 | Type            | Description            |
+| -------------------- | --------------- | ---------------------- |
+| `navItems`           | `NavItem[]`     | Navigation items array |
+| `versionsInfo`       | `VersionInfo[]` | Available versions     |
+| `currentVersionInfo` | `VersionInfo`   | Current version info   |
 
 ## Dependencies
 

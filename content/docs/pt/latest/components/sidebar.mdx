@@ -2,8 +2,8 @@
 title: Sidebar
 description: Componente de navegação lateral com árvore de páginas
 order: 3.2
-tags: ["sidebar", "navegação", "menu"]
-lastUpdated: "2026-02-03"
+tags: ['sidebar', 'navegação', 'menu']
+lastUpdated: '2026-02-03'
 ---
 
 ## Uso Básico
@@ -21,7 +21,7 @@ const sortedTree = {
   children: sortPageTree(tree.children as unknown as PageTreeNode[]),
 };
 
-<AppSidebar tree={sortedTree} />
+<AppSidebar tree={sortedTree} />;
 ```
 
 ## Arquitetura
@@ -76,10 +76,10 @@ export interface SidebarTree {
 
 Funções de processamento:
 
-| Função | Descrição |
-|--------|-----------|
-| `convertTreeToNav()` | Converte árvore de páginas para NavItems |
-| `sortPageTree()` | Ordena árvore por `order`, index, alfabético |
+| Função               | Descrição                                    |
+| -------------------- | -------------------------------------------- |
+| `convertTreeToNav()` | Converte árvore de páginas para NavItems     |
+| `sortPageTree()`     | Ordena árvore por `order`, index, alfabético |
 
 ## Customizações
 
@@ -137,7 +137,7 @@ import { ChevronRight, ChevronDown } from 'lucide-react';
     <ChevronRight className="ml-auto group-data-[state=open]/collapsible:hidden" />
     <ChevronDown className="ml-auto group-data-[state=closed]/collapsible:hidden" />
   </SidebarMenuButton>
-</CollapsibleTrigger>
+</CollapsibleTrigger>;
 ```
 
 ### Alterar Estilo do Item Ativo
@@ -155,9 +155,7 @@ Para customizar o estilo ativo, modifique o CSS do `SidebarMenuButton` em `compo
 ```tsx
 <Link
   href={item.url}
-  className={cn(
-    pathname === item.url && 'bg-accent font-semibold'
-  )}
+  className={cn(pathname === item.url && 'bg-accent font-semibold')}
 >
   {item.title}
 </Link>
@@ -183,10 +181,14 @@ import { FileText, Folder } from 'lucide-react';
 // No loop de renderização
 <SidebarMenuButton asChild isActive={pathname === item.url}>
   <Link href={item.url}>
-    {item.items ? <Folder className="size-4" /> : <FileText className="size-4" />}
+    {item.items ? (
+      <Folder className="size-4" />
+    ) : (
+      <FileText className="size-4" />
+    )}
     {item.title}
   </Link>
-</SidebarMenuButton>
+</SidebarMenuButton>;
 ```
 
 ## Lógica de Ordenação
@@ -206,7 +208,7 @@ if (aOrder !== undefined && bOrder !== undefined) {
   return aOrder - bOrder; // Ambos têm order
 }
 if (aOrder !== undefined) return -1; // a tem order, b não
-if (bOrder !== undefined) return 1;  // b tem order, a não
+if (bOrder !== undefined) return 1; // b tem order, a não
 
 // Fallback: index.mdx primeiro, depois alfabético
 ```
@@ -215,18 +217,18 @@ if (bOrder !== undefined) return 1;  // b tem order, a não
 
 ### Props do AppSidebar
 
-| Prop | Tipo | Descrição |
-|------|------|-----------|
-| `tree` | `SidebarTree` | Árvore de páginas (de `source.getPageTree()`) |
-| `...props` | `ComponentProps<Sidebar>` | Props do primitivo Sidebar |
+| Prop       | Tipo                      | Descrição                                     |
+| ---------- | ------------------------- | --------------------------------------------- |
+| `tree`     | `SidebarTree`             | Árvore de páginas (de `source.getPageTree()`) |
+| `...props` | `ComponentProps<Sidebar>` | Props do primitivo Sidebar                    |
 
 ### Frontmatter Suportado
 
-| Campo | Tipo | Descrição |
-|-------|------|-----------|
-| `title` | `string` | Título exibido no sidebar |
-| `order` | `number` | Ordem de exibição (menor = primeiro) |
-| `group` | `string` | Label de grupo acima do item |
+| Campo     | Tipo      | Descrição                                      |
+| --------- | --------- | ---------------------------------------------- |
+| `title`   | `string`  | Título exibido no sidebar                      |
+| `order`   | `number`  | Ordem de exibição (menor = primeiro)           |
+| `group`   | `string`  | Label de grupo acima do item                   |
 | `is_open` | `boolean` | Se a pasta inicia expandida (apenas index.mdx) |
 
 ## Dependências

@@ -2,8 +2,8 @@
 title: Criando Componentes
 description: Padrões e convenções para criar componentes no projeto
 order: 2.1
-tags: ["componentes", "tutorial", "desenvolvimento"]
-lastUpdated: "2026-02-03"
+tags: ['componentes', 'tutorial', 'desenvolvimento']
+lastUpdated: '2026-02-03'
 ---
 
 ## Estrutura de Pastas
@@ -54,15 +54,15 @@ Componentes devem focar em **renderização**. Lógica vai para `hooks/` ou `lib
 // ❌ ERRADO: Lógica embutida no componente
 function MyComponent() {
   const [data, setData] = useState([]);
-  
+
   useEffect(() => {
     // 50 linhas de lógica de fetch, transformação, etc.
   }, []);
-  
+
   const processData = (items) => {
     // 30 linhas de processamento
   };
-  
+
   return <div>{/* UI */}</div>;
 }
 
@@ -70,7 +70,9 @@ function MyComponent() {
 // hooks/use-my-data.ts
 export function useMyData() {
   const [data, setData] = useState([]);
-  useEffect(() => { /* fetch */ }, []);
+  useEffect(() => {
+    /* fetch */
+  }, []);
   return data;
 }
 

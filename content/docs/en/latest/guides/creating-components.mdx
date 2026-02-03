@@ -2,8 +2,8 @@
 title: Creating Components
 description: Patterns and conventions for creating components in the project
 order: 2.1
-tags: ["components", "tutorial", "development"]
-lastUpdated: "2026-02-03"
+tags: ['components', 'tutorial', 'development']
+lastUpdated: '2026-02-03'
 ---
 
 ## Folder Structure
@@ -54,15 +54,15 @@ Components should focus on **rendering**. Logic goes to `hooks/` or `lib/`.
 // ❌ WRONG: Logic embedded in component
 function MyComponent() {
   const [data, setData] = useState([]);
-  
+
   useEffect(() => {
     // 50 lines of fetch, transformation logic, etc.
   }, []);
-  
+
   const processData = (items) => {
     // 30 lines of processing
   };
-  
+
   return <div>{/* UI */}</div>;
 }
 
@@ -70,7 +70,9 @@ function MyComponent() {
 // hooks/use-my-data.ts
 export function useMyData() {
   const [data, setData] = useState([]);
-  useEffect(() => { /* fetch */ }, []);
+  useEffect(() => {
+    /* fetch */
+  }, []);
   return data;
 }
 
@@ -158,7 +160,7 @@ interface MyComponentProps {
 // 5. Component
 export function MyComponent({ title, onAction }: MyComponentProps) {
   const data = useMyHook();
-  
+
   return (
     <div className="...">
       <h2>{title}</h2>

@@ -3,23 +3,23 @@ title: Documentação
 description: Guia técnico do template de documentação Next.js
 order: 1
 group: Start
-tags: ["template", "documentação", "arquitetura"]
-version: "2.0.0"
-lastUpdated: "2026-02-03"
+tags: ['template', 'documentação', 'arquitetura']
+version: '2.0.0'
+lastUpdated: '2026-02-03'
 ---
 
 ## Arquitetura
 
 O projeto segue uma arquitetura de separação entre **UI** e **lógica**:
 
-| Pasta | Responsabilidade |
-|-------|------------------|
-| `components/` | Componentes do projeto (UI + estado local mínimo) |
-| `components/ui/` | Primitivos de UI (shadcn/ui) — **não modificar** |
-| `hooks/` | Hooks customizados (lógica reutilizável) |
-| `lib/` | Funções utilitárias e configurações |
-| `types/` | Definições TypeScript globais |
-| `contexts/` | Providers de estado global via React Context |
+| Pasta            | Responsabilidade                                  |
+| ---------------- | ------------------------------------------------- |
+| `components/`    | Componentes do projeto (UI + estado local mínimo) |
+| `components/ui/` | Primitivos de UI (shadcn/ui) — **não modificar**  |
+| `hooks/`         | Hooks customizados (lógica reutilizável)          |
+| `lib/`           | Funções utilitárias e configurações               |
+| `types/`         | Definições TypeScript globais                     |
+| `contexts/`      | Providers de estado global via React Context      |
 
 ## Componentes Principais
 

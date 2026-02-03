@@ -2,8 +2,8 @@
 title: Search
 description: Global search component for documentation
 order: 3.3
-tags: ["search", "navigation"]
-lastUpdated: "2026-02-03"
+tags: ['search', 'navigation']
+lastUpdated: '2026-02-03'
 ---
 
 ## Basic Usage
@@ -12,7 +12,7 @@ lastUpdated: "2026-02-03"
 import { AppSearch } from '@/components/app-search';
 
 // In header or navbar
-<AppSearch />
+<AppSearch />;
 ```
 
 ## Architecture
@@ -52,14 +52,14 @@ export interface SearchResultGroup {
 
 Pure processing functions:
 
-| Function | Description |
-|----------|-------------|
-| `parseHighlightParts()` | Separates text into parts for highlighting |
-| `truncateWithContext()` | Truncates text keeping match context |
-| `formatHashToTitle()` | Converts URL hash to readable title |
-| `isRelevantResult()` | Filters results by relevance |
-| `calculateRelevanceScore()` | Calculates score for sorting |
-| `groupSearchResults()` | Groups results by page |
+| Function                    | Description                                |
+| --------------------------- | ------------------------------------------ |
+| `parseHighlightParts()`     | Separates text into parts for highlighting |
+| `truncateWithContext()`     | Truncates text keeping match context       |
+| `formatHashToTitle()`       | Converts URL hash to readable title        |
+| `isRelevantResult()`        | Filters results by relevance               |
+| `calculateRelevanceScore()` | Calculates score for sorting               |
+| `groupSearchResults()`      | Groups results by page                     |
 
 ### `hooks/use-search-keyboard.ts`
 
@@ -70,11 +70,11 @@ import { useSearchKeyboard } from '@/hooks/use-search-keyboard';
 
 function MySearch() {
   const [open, setOpen] = useState(false);
-  
+
   useSearchKeyboard({
     onToggle: () => setOpen((prev) => !prev),
-    key: 'k',        // Optional, default: 'k'
-    enabled: true,   // Optional, default: true
+    key: 'k', // Optional, default: 'k'
+    enabled: true, // Optional, default: true
   });
 }
 ```
@@ -112,11 +112,11 @@ The component receives no props — it's self-contained.
 
 ### useSearchKeyboard Hook
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `onToggle` | `() => void` | — | Callback when shortcut is pressed |
-| `key` | `string` | `'k'` | Shortcut key |
-| `enabled` | `boolean` | `true` | Whether shortcut is active |
+| Prop       | Type         | Default | Description                       |
+| ---------- | ------------ | ------- | --------------------------------- |
+| `onToggle` | `() => void` | —       | Callback when shortcut is pressed |
+| `key`      | `string`     | `'k'`   | Shortcut key                      |
+| `enabled`  | `boolean`    | `true`  | Whether shortcut is active        |
 
 ## Dependencies
 

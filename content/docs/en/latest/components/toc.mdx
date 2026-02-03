@@ -2,8 +2,8 @@
 title: TOC
 description: Table of Contents component
 order: 3.1
-tags: ["toc", "index", "navigation"]
-lastUpdated: "2026-02-03"
+tags: ['toc', 'index', 'navigation']
+lastUpdated: '2026-02-03'
 ---
 
 ## Basic Usage
@@ -12,7 +12,7 @@ lastUpdated: "2026-02-03"
 import { DocToc } from '@/components/doc-toc';
 
 // In layout.tsx
-<DocToc />
+<DocToc />;
 ```
 
 The TOC is automatically fed by the `PageContent` context.
@@ -37,7 +37,7 @@ Defines the TOC item interface:
 ```tsx
 export interface TOCItem {
   title: ReactNode;
-  url: string;   // E.g., "#getting-started"
+  url: string; // E.g., "#getting-started"
   depth: number; // 2, 3, 4 (h2, h3, h4)
 }
 
@@ -69,8 +69,8 @@ Hook for scroll tracking:
 import { useScrollProgress } from '@/hooks/use-scroll-progress';
 
 function MyComponent() {
-  const progress = useScrollProgress({ 
-    containerId: 'docs-content' 
+  const progress = useScrollProgress({
+    containerId: 'docs-content',
   });
   // progress = 0-100 (percentage)
 }
@@ -85,7 +85,7 @@ import { useHashHighlight } from '@/hooks/use-hash-highlight';
 
 function MyComponent() {
   useHashHighlight({
-    delay: 100,    // Optional, default: 100ms
+    delay: 100, // Optional, default: 100ms
     enabled: true, // Optional, default: true
   });
   // Automatically highlights #section on load
@@ -96,11 +96,11 @@ function MyComponent() {
 
 Navigation functions:
 
-| Function | Description |
-|----------|-------------|
-| `highlightElement()` | Applies highlight animation |
-| `scrollToElement()` | Scrolls to element smoothly |
-| `handleTocNavigation()` | Handles TOC link click |
+| Function                | Description                 |
+| ----------------------- | --------------------------- |
+| `highlightElement()`    | Applies highlight animation |
+| `scrollToElement()`     | Scrolls to element smoothly |
+| `handleTocNavigation()` | Handles TOC link click      |
 
 ## Customizations
 
@@ -127,8 +127,8 @@ Modify the progress indicator styles:
 
 ### DocToc Props
 
-| Prop | Type | Description |
-|------|------|-------------|
+| Prop         | Type         | Description            |
+| ------------ | ------------ | ---------------------- |
 | `dictionary` | `Dictionary` | Translation dictionary |
 
 ### useToc Hook
@@ -137,9 +137,9 @@ Returns `TOCItem[]` — current page's table of contents.
 
 ### useScrollProgress Hook
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `containerId` | `string` | — | Scroll container ID |
+| Option        | Type     | Default | Description         |
+| ------------- | -------- | ------- | ------------------- |
+| `containerId` | `string` | —       | Scroll container ID |
 
 Returns `number` — scroll percentage (0-100).
 

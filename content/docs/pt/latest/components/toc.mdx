@@ -2,8 +2,8 @@
 title: TOC
 description: Componente de índice de conteúdo (Table of Contents)
 order: 3.1
-tags: ["toc", "índice", "navegação"]
-lastUpdated: "2026-02-03"
+tags: ['toc', 'índice', 'navegação']
+lastUpdated: '2026-02-03'
 ---
 
 ## Uso Básico
@@ -12,7 +12,7 @@ lastUpdated: "2026-02-03"
 import { DocToc } from '@/components/doc-toc';
 
 // No layout.tsx
-<DocToc />
+<DocToc />;
 ```
 
 O TOC é alimentado automaticamente pelo contexto `PageContent`.
@@ -37,7 +37,7 @@ Define a interface do item TOC:
 ```tsx
 export interface TOCItem {
   title: ReactNode;
-  url: string;   // Ex: "#getting-started"
+  url: string; // Ex: "#getting-started"
   depth: number; // 2, 3, 4 (h2, h3, h4)
 }
 
@@ -69,8 +69,8 @@ Hook para tracking de scroll:
 import { useScrollProgress } from '@/hooks/use-scroll-progress';
 
 function MyComponent() {
-  const progress = useScrollProgress({ 
-    containerId: 'docs-content' 
+  const progress = useScrollProgress({
+    containerId: 'docs-content',
   });
   // progress = 0-100 (porcentagem)
 }
@@ -85,7 +85,7 @@ import { useHashHighlight } from '@/hooks/use-hash-highlight';
 
 function MyComponent() {
   useHashHighlight({
-    delay: 100,    // Opcional, default: 100ms
+    delay: 100, // Opcional, default: 100ms
     enabled: true, // Opcional, default: true
   });
   // Automaticamente destaca #section ao carregar
@@ -96,10 +96,10 @@ function MyComponent() {
 
 Funções de navegação:
 
-| Função | Descrição |
-|--------|-----------|
-| `highlightElement()` | Aplica animação de highlight |
-| `scrollToElement()` | Scroll suave até elemento |
+| Função                  | Descrição                        |
+| ----------------------- | -------------------------------- |
+| `highlightElement()`    | Aplica animação de highlight     |
+| `scrollToElement()`     | Scroll suave até elemento        |
 | `handleTocNavigation()` | Combina scroll + URL + highlight |
 
 ## Customizações
@@ -160,7 +160,7 @@ No componente, os níveis usam `data-depth`:
 Para mais indentação:
 
 ```tsx
-className="data-[depth=3]:pl-6 data-[depth=4]:pl-10"
+className = 'data-[depth=3]:pl-6 data-[depth=4]:pl-10';
 ```
 
 ### Alterar Estilo do Item Ativo
@@ -188,13 +188,13 @@ Para customizar:
 
 ```tsx
 // Alterar cor
-className="... bg-green-500"
+className = '... bg-green-500';
 
 // Alterar largura
-className="... w-2"
+className = '... w-2';
 
 // Alterar lado (esquerda)
-className="absolute left-0 ..."
+className = 'absolute left-0 ...';
 ```
 
 ### Ocultar em Mobile
@@ -214,8 +214,8 @@ Para mostrar em telas menores, altere `xl:flex` para `lg:flex` ou `md:flex`.
 O componente interno `DocsTableOfContents` suporta dropdown:
 
 ```tsx
-<DocsTableOfContents 
-  toc={toc} 
+<DocsTableOfContents
+  toc={toc}
   variant="dropdown" // ou "list" (default)
 />
 ```
@@ -244,32 +244,32 @@ MDX → page.tsx → PageContent → window.toc
 
 ### Props do DocToc
 
-| Prop | Tipo | Descrição |
-|------|------|-----------|
+| Prop       | Tipo                      | Descrição                  |
+| ---------- | ------------------------- | -------------------------- |
 | `...props` | `ComponentProps<Sidebar>` | Props do primitivo Sidebar |
 
 ### Hook useToc
 
 ```tsx
-function useToc(): TOCItem[]
+function useToc(): TOCItem[];
 ```
 
 Retorna array de items do TOC, atualizado automaticamente.
 
 ### Hook useScrollProgress
 
-| Prop | Tipo | Descrição |
-|------|------|-----------|
+| Prop          | Tipo     | Descrição                 |
+| ------------- | -------- | ------------------------- |
 | `containerId` | `string` | ID do elemento scrollável |
 
 Retorna `number` (0-100).
 
 ### Hook useHashHighlight
 
-| Prop | Tipo | Default | Descrição |
-|------|------|---------|-----------|
-| `delay` | `number` | `100` | Delay antes de highlight (ms) |
-| `enabled` | `boolean` | `true` | Se o hook está ativo |
+| Prop      | Tipo      | Default | Descrição                     |
+| --------- | --------- | ------- | ----------------------------- |
+| `delay`   | `number`  | `100`   | Delay antes de highlight (ms) |
+| `enabled` | `boolean` | `true`  | Se o hook está ativo          |
 
 ## Dependências
 

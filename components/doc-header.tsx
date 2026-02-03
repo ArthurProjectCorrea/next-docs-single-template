@@ -1,6 +1,5 @@
 'use client';
 
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { DocPagination } from '@/components/doc-pagination';
 import { DocBreadcrumbs } from '@/components/doc-breadcrumbs';
@@ -72,7 +71,6 @@ export function DocHeader({
           </span>
         )}
       </div>
-      <Separator className="my-6" />
     </header>
   );
 }
