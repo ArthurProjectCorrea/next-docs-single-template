@@ -74,17 +74,34 @@ export function DocSidebar({
         <Collapsible
           key={item.title}
           open={isOpen}
-          onOpenChange={() => toggleOpen(item.id || item.title)}
           className="group/collapsible"
         >
           <SidebarMenuItem>
-            <CollapsibleTrigger asChild>
-              <SidebarMenuButton>
-                {item.title}{' '}
-                <Plus className="ml-auto group-data-[state=open]/collapsible:hidden" />
-                <Minus className="ml-auto group-data-[state=closed]/collapsible:hidden" />
-              </SidebarMenuButton>
-            </CollapsibleTrigger>
+            <SidebarMenuButton
+              isActive={pathname === item.url}
+              className="justify-between gap-0 pr-0"
+            >
+              {item.url ? (
+                <Link href={item.url} className="flex-1 truncate">
+                  {item.title}
+                </Link>
+              ) : (
+                <span className="flex-1 truncate">{item.title}</span>
+              )}
+              <CollapsibleTrigger
+                asChild
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleOpen(item.id || item.title);
+                }}
+              >
+                <span className="flex h-full items-center px-2 hover:bg-sidebar-accent rounded-md">
+                  <Plus className="size-4 group-data-[state=open]/collapsible:hidden" />
+                  <Minus className="size-4 group-data-[state=closed]/collapsible:hidden" />
+                </span>
+              </CollapsibleTrigger>
+            </SidebarMenuButton>
             <CollapsibleContent>
               <SidebarMenuSub>
                 {item.items.map((subItem) => (

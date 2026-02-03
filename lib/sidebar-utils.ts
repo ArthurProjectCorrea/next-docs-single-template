@@ -47,6 +47,7 @@ export function convertTreeToNav(
   tree.forEach((node) => {
     let defaultOpen = false;
     let group: string | undefined;
+    let nodeUrl: string | undefined = node.url;
 
     if (node.type === 'folder' && node.index && node.index.url) {
       // Extract slug from URL, removing /docs/version/ prefix
@@ -57,6 +58,8 @@ export function convertTreeToNav(
       const data = indexPage?.data as unknown as CustomPageData | undefined;
       defaultOpen = data?.is_open ?? false;
       group = data?.group;
+      // Use the index URL for folders so they are clickable
+      nodeUrl = node.index.url;
     } else if (node.type === 'page' && node.url) {
       const slugMatch = node.url.match(/^\/docs\/[^/]+\/?(.*)/);
       const slug = slugMatch ? slugMatch[1] : '';
@@ -67,7 +70,7 @@ export function convertTreeToNav(
     }
 
     // Add locale prefix to URLs
-    const localizedUrl = node.url ? `${localePrefix}${node.url}` : undefined;
+    const localizedUrl = nodeUrl ? `${localePrefix}${nodeUrl}` : undefined;
 
     result.push({
       title: String(node.name) || 'Untitled',

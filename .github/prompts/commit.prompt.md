@@ -2,41 +2,37 @@
 agent: agent
 ---
 
-You are an assistant that generates **high‑quality, semantic Git commit messages** following the **Conventional Commits** specification, based **only** on the files currently staged in the repository.
+# Git Commit Message Generator
 
-## Expected Input (provided by the calling agent)
-
-- `staged_files`: Array of file paths currently staged for commit.
-- `changes_summary`: Map where each file path maps to a concise description of the change
-  - Examples: `"added"`, `"modified: removed validation X"`, `"deleted"`.
-- `diffs` (optional): Map of unified diffs per file (e.g. output of `git diff --staged <file>`).
+Generate **semantic, professional Git commit messages** following **Conventional Commits** specification.
 
 ---
 
-## Objective
+## 🎯 Mission
 
-Generate **ONE complete commit message**, ready to be passed directly to:
+Analyze staged changes and produce a **single, ready-to-use commit message** for:
 
-```Typescript
+```bash
 git commit -m "<message>"
 ```
 
-To do this, you must:
+---
 
-1. Analyze the staged changes per file.
-2. Classify the overall change type (`feat`, `fix`, etc.).
-3. Infer a meaningful and concise `scope`.
-4. Detect **breaking changes** when applicable.
-5. Produce a clear, conventional, and human‑readable commit message.
+## 📥 Input Requirements
+
+Before generating, gather:
+
+1. **Staged files**: Run `git diff --staged --name-only`
+2. **Change details**: Run `git diff --staged` for unified diffs
+3. **File status**: Run `git status --porcelain`
 
 ---
 
-## Output Rules (MANDATORY)
+## 📤 Output Format
 
-- **Output ONLY the commit message** — no explanations, no markdown, no metadata.
-- Follow the Conventional Commits format:
+**CRITICAL**: Output ONLY the commit message. No explanations, no markdown blocks, no metadata.
 
-```Typescript
+```
 <type>(<scope>): <subject>
 
 <body>
@@ -44,159 +40,269 @@ To do this, you must:
 <footer>
 ```
 
-- The message must be valid, concise, and professional.
+---
+
+## 📋 Commit Types
+
+| Type       | When to Use                                |
+| ---------- | ------------------------------------------ |
+| `feat`     | New feature or functionality               |
+| `fix`      | Bug fix                                    |
+| `docs`     | Documentation only                         |
+| `style`    | Formatting, whitespace (no logic change)   |
+| `refactor` | Code restructuring without behavior change |
+| `perf`     | Performance improvement                    |
+| `test`     | Adding or modifying tests                  |
+| `build`    | Build system, dependencies                 |
+| `ci`       | CI/CD configuration                        |
+| `chore`    | Maintenance, tooling, configs              |
 
 ---
 
-## Commit Header Rules
+## 🔍 Scope Detection
 
-### Type
+Infer scope from **file paths** or **affected domain**:
 
-Choose exactly one of the following:
+| Path Pattern       | Suggested Scope             |
+| ------------------ | --------------------------- |
+| `components/ui/*`  | `ui`                        |
+| `components/app-*` | `components`                |
+| `components/doc-*` | `docs`                      |
+| `lib/*`            | `lib` or specific util name |
+| `app/api/*`        | `api`                       |
+| `app/[locale]/*`   | `i18n` or `routing`         |
+| `contexts/*`       | `context` or feature name   |
+| `hooks/*`          | `hooks`                     |
+| `types/*`          | `types`                     |
+| `content/docs/*`   | `content`                   |
+| `.github/*`        | `ci` or `github`            |
+| Config files       | `config`                    |
 
-- `feat` – new user‑visible functionality
-- `fix` – bug fixes
-- `perf` – performance improvements
-- `docs` – documentation only
-- `style` – formatting, whitespace, lint (no logic change)
-- `refactor` – internal restructuring without behavior change
-- `test` – adding or modifying tests
-- `chore` – maintenance, tooling, configs
-- `ci` – CI/CD related changes
-- `build` – build system or dependencies
+**Rules:**
 
-### Scope
-
-- Infer from file paths or affected domain.
-  - Examples: `auth`, `api`, `ui`, `payments`, `components/button`
-- Use lowercase, keep it short.
-- Omit the scope if it is unclear or spans unrelated domains.
-
-### Subject
-
-- Use the **imperative mood** (e.g. “add”, “fix”, “remove”).
-- No trailing period.
-- Maximum **50 characters**.
-- Describe _what_ changed, not _how_.
+- Use lowercase, short names
+- Omit scope if changes span unrelated domains
+- Group related changes under single scope
 
 ---
 
-## Body (Optional)
+## ✍️ Subject Line Rules
 
-Include a body **only when it adds value**.
-
-- Explain **what changed and why**, not line‑by‑line details.
-- Wrap lines at ~72 characters.
-- Separate from the header with a blank line.
+| Rule                   | Example                                            |
+| ---------------------- | -------------------------------------------------- |
+| Imperative mood        | ✅ "add" ❌ "added" ❌ "adding"                    |
+| No period at end       | ✅ "add feature" ❌ "add feature."                 |
+| Max 50 characters      | Keep it concise                                    |
+| Describe WHAT, not HOW | ✅ "add auth" ❌ "implement OAuth2 flow with PKCE" |
+| Lowercase after type   | ✅ "feat: add" ❌ "feat: Add"                      |
 
 ---
 
-## Footer (Optional)
+## 📝 Body Guidelines
 
-Use the footer for:
+Include body **only when it adds value**:
 
-- **Breaking changes**:
+✅ **Include when:**
 
-```Typescript
-BREAKING CHANGE: <concise description>
+- Change is complex or non-obvious
+- Multiple related changes in one commit
+- Breaking change needs explanation
+- Context helps future readers
+
+❌ **Skip when:**
+
+- Subject is self-explanatory
+- Simple single-file change
+- Formatting/style only
+
+**Body format:**
+
+- Separate from header with blank line
+- Wrap at ~72 characters
+- Explain **what** and **why**, not line-by-line
+
+---
+
+## 🚨 Breaking Change Detection
+
+**Indicators of breaking changes:**
+
+| Change Type                | Example                          |
+| -------------------------- | -------------------------------- |
+| Removed public API         | Function/method deleted          |
+| Renamed exports            | `Button` → `BaseButton`          |
+| Changed function signature | Required param added             |
+| Modified return types      | Object shape changed             |
+| Route changes              | `/api/users` → `/api/v2/users`   |
+| Prop changes               | Required prop added to component |
+| Environment changes        | New required env var             |
+
+**When detected:**
+
+1. Use normal type (NOT a special type)
+2. Add `!` after type: `feat!:` or `feat(scope)!:`
+3. Explain impact in body
+4. Add footer: `BREAKING CHANGE: <description>`
+
+---
+
+## 🔄 Multi-File Change Strategy
+
+| Scenario                  | Approach                                    |
+| ------------------------- | ------------------------------------------- |
+| Same feature across files | Single scope, summarize in body             |
+| Related refactoring       | Use `refactor`, list files in body          |
+| Mixed types (feat + fix)  | Use dominant type, note others in body      |
+| Unrelated changes         | **Ask user to split** or use broadest scope |
+
+---
+
+## 📊 Decision Flowchart
+
+```
+1. Are there staged files?
+   NO  → Return empty string
+   YES → Continue
+
+2. Is it pure formatting/whitespace?
+   YES → style: format code
+   NO  → Continue
+
+3. Is it documentation only?
+   YES → docs(<scope>): <subject>
+   NO  → Continue
+
+4. Does it add new functionality?
+   YES → feat(<scope>): <subject>
+   NO  → Continue
+
+5. Does it fix a bug?
+   YES → fix(<scope>): <subject>
+   NO  → Continue
+
+6. Does it improve performance?
+   YES → perf(<scope>): <subject>
+   NO  → Continue
+
+7. Does it restructure without behavior change?
+   YES → refactor(<scope>): <subject>
+   NO  → Continue
+
+8. Default → chore(<scope>): <subject>
 ```
 
-- Issue or ticket references:
+---
 
-```Typescript
-Refs #123
+## ✅ Quality Checklist
+
+Before outputting, verify:
+
+- [ ] Type is correct for the change
+- [ ] Scope is accurate and concise
+- [ ] Subject is imperative and ≤50 chars
+- [ ] No trailing period in subject
+- [ ] Body adds value (or is omitted)
+- [ ] Breaking changes are flagged
+- [ ] Message is professional and clear
+
+---
+
+## 📚 Examples
+
+### Simple feature
+
+```
+feat(sidebar): add collapsible navigation groups
+```
+
+### Bug fix with context
+
+```
+fix(breadcrumbs): resolve missing index page URLs
+
+Index pages from folders were not appearing in breadcrumb
+navigation due to incorrect URL resolution logic.
+```
+
+### Breaking change
+
+```
+feat(api)!: change user response structure
+
+Update /api/users to return nested profile object instead of
+flat structure. This enables avatar support without additional
+API calls.
+
+BREAKING CHANGE: displayName moved to profile.name. Clients
+must update to use the new response structure.
+```
+
+### Multi-file refactor
+
+```
+refactor(lib): consolidate sidebar utilities
+
+Merge sortPageTree and convertTreeToNav into unified module.
+Improves maintainability and reduces code duplication.
+
+Affected files:
+- lib/sidebar-utils.ts
+- lib/source.ts
+```
+
+### Documentation update
+
+```
+docs(readme): update installation instructions
+```
+
+### Chore/maintenance
+
+```
+chore(deps): upgrade next.js to 16.1.4
+```
+
+### Style/formatting
+
+```
+style: apply prettier formatting
 ```
 
 ---
 
-## Change Classification Guidelines
+## ⚠️ Edge Cases
 
-For each file in `staged_files`, use `changes_summary` and `diffs` (if provided):
-
-- New behavior or feature → `feat`
-- Bug fix → `fix`
-- Performance improvement → `perf`
-- Documentation only → `docs`
-- Refactor without behavior change → `refactor`
-- Formatting or lint‑only → `style` or `chore`
-- Tests → `test`
-
-If multiple files are involved:
-
-- Group them under a **single scope** when they belong to the same domain.
-- If changes span multiple domains, choose the **most representative scope**.
-- Do **not** generate multiple commits unless explicitly instructed.
+| Situation               | Action                               |
+| ----------------------- | ------------------------------------ |
+| No staged files         | Return empty string                  |
+| Only lock files changed | `chore(deps): update dependencies`   |
+| Generated files only    | `build: regenerate artifacts`        |
+| Config + code mixed     | Focus on code change, mention config |
+| Revert commit           | `revert: <original subject>`         |
 
 ---
 
-## Breaking Change Detection
+## 🚫 Never Do
 
-Treat a change as **BREAKING** if the diff indicates:
-
-- Removal or renaming of public APIs
-- Changes to exported types or interfaces
-- HTTP contract changes (request/response shape, status codes)
-- Route changes
-- Required prop changes in public components
-
-When detected:
-
-1. Use the normal `type` (do NOT invent new types).
-2. Explain the impact in the body.
-3. Add a `BREAKING CHANGE:` entry in the footer.
+- ❌ Include explanations outside the commit message
+- ❌ Use past tense ("added", "fixed")
+- ❌ Start with capital letter after colon
+- ❌ End subject with period
+- ❌ Exceed 50 chars in subject
+- ❌ Use vague subjects ("update code", "fix stuff")
+- ❌ Invent new commit types
+- ❌ Include file paths in subject (use body)
 
 ---
 
-## Edge Cases
+## 🎬 Execution
 
-- **No staged files** → return an empty string.
-- **Pure formatting across many files** → prefer:
+Upon receiving staged changes:
 
-```Typescript
-style: format code with prettier
-```
-
----
-
-## Reference Commands (DO NOT EXECUTE)
-
-- List staged files:
-  - `git status --porcelain`
-  - `git diff --staged --name-only`
-- View staged diff:
-  - `git diff --staged <path>`
-- Local checks:
-  - `npm run build`
-  - `npx prettier --check <path>`
-  - `npx eslint <path> --fix`
-
----
-
-## Examples (TEXT OUTPUT ONLY)
-
-```Typescript
-feat(auth): add Google OAuth login
-```
-
-```Typescript
-fix(api): handle null user response
-```
-
-```Typescript
-feat(api): change /users response to include profile
-
-Update /users to return a profile object with name and avatar
-instead of displayName, enabling avatar rendering without
-additional requests.
-
-BREAKING CHANGE: displayName was removed from /users response.
-Clients must use profile.name instead.
-```
-
----
-
-## Final Enforcement
-
-- Always return **only** the commit message.
-- Never include explanations or extra text.
-- Generate the commit immediately upon receiving valid input.
+1. **Analyze** all staged files and diffs
+2. **Classify** the primary change type
+3. **Determine** appropriate scope
+4. **Compose** subject line (imperative, ≤50 chars)
+5. **Add body** if needed for context
+6. **Add footer** for breaking changes or refs
+7. **Output** ONLY the final commit message

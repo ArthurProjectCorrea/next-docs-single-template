@@ -1,7 +1,6 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useBreadcrumb } from 'fumadocs-core/breadcrumb';
 import Link from 'next/link';
 import {
   Breadcrumb,
@@ -29,23 +28,72 @@ interface DocBreadcrumbsProps {
   locale?: Locale;
 }
 
-// Helper para encontrar se um URL é um index (pasta)
-function isIndexUrl(url: string | undefined, tree: PageTreeNode): boolean {
-  if (!url) return false;
+interface BreadcrumbEntry {
+  name: string;
+  url?: string;
+}
 
-  const findNode = (node: PageTreeNode, targetUrl: string): boolean => {
-    if (node.type === 'folder' && node.index?.url === targetUrl) {
-      return true;
+// Encontra todos os índices de pastas no caminho do pathname
+function findBreadcrumbsWithIndexes(
+  tree: PageTreeNode,
+  pathname: string,
+  localePrefix: string,
+): BreadcrumbEntry[] {
+  const results: BreadcrumbEntry[] = [];
+  // Remove locale prefix from pathname for matching
+  const cleanPathname = localePrefix
+    ? pathname.replace(localePrefix, '')
+    : pathname;
+
+  const traverse = (node: PageTreeNode): boolean => {
+    // Verifica se o pathname atual começa com a URL deste nó
+    if (node.type === 'folder' && node.index?.url) {
+      const nodeUrl = node.index.url;
+      // O pathname deve começar com a URL do índice ou ser exatamente igual
+      if (
+        cleanPathname === nodeUrl ||
+        cleanPathname.startsWith(nodeUrl + '/')
+      ) {
+        results.push({
+          name: node.name,
+          url: `${localePrefix}${nodeUrl}`,
+        });
+
+        // Continua buscando nos filhos
+        if (node.children) {
+          for (const child of node.children) {
+            traverse(child);
+          }
+        }
+        return true;
+      }
+    } else if (node.type === 'page' && node.url) {
+      if (cleanPathname === node.url) {
+        // Página atual, não adiciona (será adicionada como pageTitle)
+        return true;
+      }
     }
 
+    // Busca nos filhos
     if (node.children) {
-      return node.children.some((child) => findNode(child, targetUrl));
+      for (const child of node.children) {
+        if (traverse(child)) {
+          return true;
+        }
+      }
     }
 
     return false;
   };
 
-  return findNode(tree, url);
+  // Busca na árvore principal
+  if (tree.children) {
+    for (const child of tree.children) {
+      traverse(child);
+    }
+  }
+
+  return results;
 }
 
 export function DocBreadcrumbs({
@@ -54,32 +102,25 @@ export function DocBreadcrumbs({
   locale,
 }: DocBreadcrumbsProps) {
   const pathname = usePathname();
-  const items = useBreadcrumb(pathname, tree);
   const { dictionary } = useDictionary();
 
   // Adicionar Home no início with locale prefix
   const localePrefix = locale ? `/${locale}` : '';
-  const homeItem = {
+  const homeItem: BreadcrumbEntry = {
     name: dictionary.navigation.home,
     url: localePrefix || '/',
   };
 
-  // Remover URLs dos itens que são index (pastas)
-  const modifiedItems = items.map((item) => {
-    const isIndex = isIndexUrl(item.url, tree);
-    // Add locale prefix to URLs
-    const localizedUrl = item.url ? `${localePrefix}${item.url}` : undefined;
-    return isIndex
-      ? { ...item, url: undefined }
-      : { ...item, url: localizedUrl };
-  });
+  // Encontra todos os índices no caminho
+  const pathItems = findBreadcrumbsWithIndexes(tree, pathname, localePrefix);
 
-  // Adicionar a página atual ao final se houver pageTitle e não for um index
-  const allItems = [homeItem, ...modifiedItems];
+  // Monta a lista final
+  const allItems: BreadcrumbEntry[] = [homeItem, ...pathItems];
 
-  if (pageTitle && !isIndexUrl(pathname, tree)) {
-    const lastItem = modifiedItems[modifiedItems.length - 1];
-    // Se a última item é diferente da página atual, adiciona a página atual
+  // Adiciona a página atual se houver pageTitle
+  if (pageTitle) {
+    const lastItem = pathItems[pathItems.length - 1];
+    // Se a última item é diferente da página atual, adiciona
     if (lastItem?.name !== pageTitle) {
       allItems.push({ name: pageTitle, url: undefined });
     }

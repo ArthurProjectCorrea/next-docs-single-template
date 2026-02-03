@@ -2,31 +2,140 @@
 applyTo: '**'
 ---
 
-This file contains clear and mandatory instructions on how to use and create components in this repository. Always follow them when generating, modifying, or reviewing code.
+# Component Guidelines
 
-General rules (mandatory):
+> **MANDATORY** rules for all contributors and AI agents working with components.
 
-- **Consult internal documentation first:** always check the files in `docs/shadcn-ui` to understand the component's API, props, examples, and recommendations before using or extending it.
-- **Do not create new components inside `components/ui`.** This folder maintains third-party implementations or UI library components; **never** add custom components there.
-- **Create new components in the root `components/`.** If you need a custom component or variation, create a new file/dir directly in `components/` (e.g., `components/MyCustomButton.tsx`).
-- **Prioritize using existing UI components.** Before creating something new, check if a component in the `components/ui` folder meets your needs; prefer composition and props for customization.
-- **Light customizations:** if you need to customize behavior/style, create wrappers or small components in the root `components/` that use/encapsulate components from `components/ui`.
-- **Consistent imports:** import components with absolute paths from the project root using the `@/` alias, for example:
-  - `import { Button } from '@/components/ui/button'` (use the UI component)
-  - `import MyCustomButton from '@/components/MyCustomButton'` (use component created in root `components/`)
-- **Name and location:** reusable components should have clear names and be in the root `components/`. Very specific subcomponents can be in `components/<feature>/`.
-- **Document new components:** when creating a new component, add documentation in `docs/shadcn-ui` (or create a corresponding file in `docs/`), including usage examples, props, and accessibility when applicable.
-- **Tests and accessibility:** check accessibility and write basic tests when creating critical components.
-- **Style and formatting:** follow the project's configurations (Prettier, ESLint, etc.). Use `npm run format` and run linters locally.
+---
 
-Recommended procedures:
+## 🚫 DO NOT
 
-1. Before implementing: search the corresponding documentation in `docs/shadcn-ui` to confirm if a component that meets the need already exists.
-2. If it exists, prefer to reuse/compose. Only create a new component if there is clear justification (API limitations, different behavior need, etc.).
-3. When creating a new component: place it in `components/`, document it in `docs/`, and write a small test and usage examples.
-4. When opening PRs: describe in the body how the new component differs from existing ones, links to consulted documentation, and include a usage example.
+| Action                                                  | Reason                                 |
+| ------------------------------------------------------- | -------------------------------------- |
+| Create files in `components/ui/`                        | Reserved for shadcn/ui primitives only |
+| Modify existing `components/ui/*` files                 | Third-party library components         |
+| Duplicate functionality that exists in `components/ui/` | Use composition instead                |
+| Use relative imports for components                     | Always use `@/` alias                  |
+| Skip documentation for new components                   | All new components need docs           |
 
-Notes:
+---
 
-- These instructions are **mandatory** for contributions; reviewers and CI can use these rules to validate changes.
-- In case of doubt about location or design, open an issue or talk to the team responsible for the system design.
+## ✅ DO
+
+| Action                             | Location                       |
+| ---------------------------------- | ------------------------------ |
+| Create custom components           | `components/` root             |
+| Create feature-specific components | `components/<feature>/`        |
+| Document new components            | `docs/shadcn-ui/` or `docs/`   |
+| Wrap/extend UI components          | `components/` with composition |
+
+---
+
+## 📁 File Structure
+
+```
+components/
+├── ui/                    # ❌ DO NOT MODIFY - shadcn/ui primitives
+│   ├── button.tsx
+│   ├── dialog.tsx
+│   └── ...
+├── app-header.tsx         # ✅ Project components
+├── doc-sidebar.tsx        # ✅ Feature components
+└── <feature>/             # ✅ Feature-specific folders
+    └── custom-widget.tsx
+```
+
+---
+
+## 🔍 Before Creating a Component
+
+1. **Check `docs/shadcn-ui/`** for existing component documentation
+2. **Check `components/ui/`** for available primitives
+3. **Can it be achieved with composition?** Use props/children instead of new component
+4. **Still need a new component?** Create in `components/` root
+
+---
+
+## 📝 Import Pattern
+
+```typescript
+// ✅ CORRECT - UI primitives
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+
+// ✅ CORRECT - Custom components
+import { AppHeader } from '@/components/app-header';
+import { DocSidebar } from '@/components/doc-sidebar';
+
+// ❌ WRONG - Relative imports
+import { Button } from '../ui/button';
+import { AppHeader } from './app-header';
+```
+
+---
+
+## 🆕 Creating New Components
+
+### Required Steps
+
+1. **Create file** in `components/` (not `components/ui/`)
+2. **Use existing UI primitives** from `components/ui/` when possible
+3. **Add documentation** in `docs/shadcn-ui/<component-name>.md`
+4. **Include in docs:**
+   - Component description
+   - Props table
+   - Usage examples
+   - Accessibility notes (if applicable)
+
+### Template
+
+```typescript
+// components/my-component.tsx
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+interface MyComponentProps {
+  // props here
+}
+
+export function MyComponent({ ...props }: MyComponentProps) {
+  return (
+    // Use UI primitives via composition
+  );
+}
+```
+
+---
+
+## 🎨 Styling Rules
+
+| Rule                               | Example                             |
+| ---------------------------------- | ----------------------------------- |
+| Use Tailwind classes               | `className="flex items-center"`     |
+| Use design tokens                  | `bg-primary`, `text-foreground`     |
+| Use `cn()` for conditional classes | `cn("base", condition && "active")` |
+| **Never** hardcode colors          | ❌ `bg-black`, `#fff`, `rgb(...)`   |
+
+---
+
+## ✔️ PR Checklist
+
+- [ ] Component created in `components/` (not `components/ui/`)
+- [ ] Uses existing UI primitives when possible
+- [ ] Documentation added in `docs/`
+- [ ] Imports use `@/` alias
+- [ ] No hardcoded colors
+- [ ] Passes `npm run lint`
+- [ ] Passes `npm run format`
+
+---
+
+## 📚 Quick Reference
+
+| Need                | Solution                                    |
+| ------------------- | ------------------------------------------- |
+| New button variant  | Compose with `<Button>` + custom classes    |
+| New modal           | Compose with `<Dialog>` components          |
+| Custom form field   | Wrap `<Input>` + `<Label>` in new component |
+| Complex widget      | Create in `components/` using UI primitives |
+| Feature-specific UI | Create in `components/<feature>/`           |

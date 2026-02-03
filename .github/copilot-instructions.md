@@ -1,163 +1,135 @@
 # Copilot / AI Agent Instructions for next-docs-single-template
 
-Actionable instructions for AI coding agents working in this versioned documentation template.
+Actionable instructions for AI coding agents working in this versioned, multi-language documentation template.
 
 ---
 
 ## Architecture Overview
 
-- **Next.js 16 (App Router)** + TypeScript + Tailwind 4: Server/client component mix under `app/`.
-- **Versioned documentation**: Content in `content/docs/{version}/` (e.g., `latest/`, `v1/`). Dynamic routes at `app/docs/[version]/[[...slug]]/`.
-- **UI separation**: Primitives in `components/ui/` (shadcn/ui - **never modify**), project components in `components/`.
-- **Server-only utilities**: `lib/source.ts` and `lib/sidebar-utils.ts` use `fumadocs-mdx:collections/server` - cannot be imported in client components.
-- **Contexts**: State providers in `contexts/` (e.g., `toc-context.tsx`, `page-content.tsx`).
-- **Fumadocs**: MDX processing via `fumadocs-mdx` + `fumadocs-core` with search, TOC, and sidebar.
+- **Next.js 16 (App Router)** + TypeScript + Tailwind 4
+- **Multi-language (i18n)**: Routes under `app/[locale]/`, content in `content/docs/{locale}/{version}/`
+- **Versioned documentation**: Each locale has versions (`latest/`, `v1/`, etc.)
+- **UI separation**: Primitives in `components/ui/` (shadcn/ui - **never modify**), project components in `components/`
+- **Server-only utilities**: `lib/source.ts`, `lib/sidebar-utils.ts`, `lib/i18n.ts`, `lib/dictionaries.ts` use `server-only`
+- **Fumadocs**: MDX processing via `fumadocs-mdx` + `fumadocs-core`
 
-## Key Files & Data Flow
-
-| File                                      | Purpose                                                                                               |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `source.config.ts`                        | MDX frontmatter schema (title, description, order, tags, version)                                     |
-| `lib/source.ts`                           | Versioned source loader: `getVersions()`, `getVersionInfo()`, `getAllSources()`, `getSource(version)` |
-| `lib/sidebar-utils.ts`                    | Server-only: `convertTreeToNav()`, `sortPageTree()`                                                   |
-| `lib/pagination-utils.ts`                 | Previous/next page links with version support                                                         |
-| `app/docs/[version]/layout.tsx`           | Docs layout with sidebar, TOC, version switcher                                                       |
-| `app/docs/[version]/[[...slug]]/page.tsx` | Page renderer with `generateStaticParams`                                                             |
-| `components/doc-sidebar.tsx`              | Client sidebar receiving pre-converted `navItems`                                                     |
-| `components/app-search.tsx`               | Search with version filtering toggle                                                                  |
-| `components/app-version-switcher.tsx`     | Version dropdown with semver display                                                                  |
-| `types/sidebar.ts`                        | Shared types: `TreeNode`, `PageTreeNode`, `NavItem`, `VersionInfo`                                    |
-
-## Versioning System
+## Content Structure
 
 ```
 content/docs/
-├── latest/           # Current version folder
-│   ├── index.mdx     # version: "2.0.0" in frontmatter
-│   └── ...
-└── v1/               # Archived version folder
-    ├── index.mdx     # version: "1.0.0" in frontmatter
-    └── ...
+├── en/                    # English
+│   ├── latest/            # Current version
+│   │   ├── index.mdx      # version: "2.0.0"
+│   │   └── guides/
+│   │       └── index.mdx  # is_open: true (folder indexes only)
+│   └── v1/
+└── pt/                    # Portuguese
+    ├── latest/
+    └── v1/
 ```
 
-- **Folder-based**: Each folder in `content/docs/` is a version (`latest`, `v1`, `v2`).
-- **Auto-discovery**: `getVersions()` extracts versions from file paths dynamically.
-- **Frontmatter `version` field**: Semantic version string in root `index.mdx` per version.
-- **VersionInfo type**: `{ name: string, semver: string, isLatest: boolean }` for UI display.
-- **Search filtering**: `app-search.tsx` filters results by URL prefix `/docs/{version}/`.
+## Key Files & Data Flow
+
+| File                                     | Purpose                                                         |
+| ---------------------------------------- | --------------------------------------------------------------- |
+| `lib/i18n.ts`                            | Locale types, validation, pathname helpers (server-only)        |
+| `lib/dictionaries.ts`                    | UI translations loader (server-only)                            |
+| `lib/source.ts`                          | `getSource(version)`, `getVersions(locale)`, `getVersionInfo()` |
+| `lib/sidebar-utils.ts`                   | `convertTreeToNav(tree, version, locale)` - adds locale prefix  |
+| `app/[locale]/layout.tsx`                | Root layout with `DictionaryProvider`                           |
+| `app/[locale]/docs/[version]/layout.tsx` | Docs layout with sidebar, TOC                                   |
+| `contexts/dictionary-context.tsx`        | Client-side dictionary access                                   |
+| `dictionaries/{en,pt}.json`              | UI string translations                                          |
+
+## i18n System
+
+```typescript
+// Supported locales (lib/i18n.ts)
+export const locales = ['en', 'pt'] as const;
+export type Locale = 'en' | 'pt';
+
+// Server: Load dictionary
+import { getDictionary } from '@/lib/dictionaries';
+const dict = await getDictionary(locale);
+
+// Client: Use context
+import { useDictionary } from '@/contexts/dictionary-context';
+const { dictionary } = useDictionary();
+```
+
+**URL Structure**: `/{locale}/docs/{version}/{slug}` → `/en/docs/latest/guides`
 
 ## Server/Client Boundary (Critical)
 
 ```typescript
-// ✅ Server Component (app/docs/[version]/layout.tsx)
+// ✅ Server Component
 import { getSource, getVersionInfo } from '@/lib/source';
-import { sortPageTree, convertTreeToNav } from '@/lib/sidebar-utils';
+import { getDictionary } from '@/lib/dictionaries';
 
-const source = getSource(version);
-const navItems = convertTreeToNav(
-  sortPageTree(source.pageTree, version),
-  version,
-);
-// Pass navItems as props to client component
-
-// ❌ Client Component - NEVER import server-only modules
+// ❌ Client Component - Will fail!
 ('use client');
-import { getSource } from '@/lib/source'; // Will fail!
+import { getSource } from '@/lib/source'; // server-only module
 ```
 
-**Rule**: Server components fetch/process data, pass serializable props to client components.
+**Pattern**: Server fetches data → passes serializable props → Client renders
 
-## Component Conventions
-
-```typescript
-// ✅ Correct imports
-import { Button } from '@/components/ui/button'; // UI primitive
-import { DocSidebar } from '@/components/doc-sidebar'; // Project component
-import type { VersionInfo } from '@/types/sidebar'; // Shared types
-
-// ❌ Never add custom components to components/ui/
-// ✅ Create in components/ instead
-```
-
-- **New components**: Create in `components/`, document in `docs/shadcn-ui/`.
-- **Type assertions**: Use `as unknown as CustomPageData` when accessing fumadocs page data with custom frontmatter fields.
-
-## MDX Frontmatter Schema
+## MDX Frontmatter
 
 ```yaml
----
-title: Page Title # required
-description: Short desc # optional
-order: 1 # optional, controls sidebar order
-group: Category Name # optional, adds section label
-tags: ['tag1', 'tag2'] # optional, searchable
-is_open: true # optional, folder expanded by default
-version: '1.0.0' # only on root index.mdx per version
----
+# All pages
+title: 'Page Title' # required
+description: '...' # optional
+order: 2.1 # sidebar sort (decimals for sub-ordering)
+tags: ['search', 'terms'] # optional
+
+# Index pages only
+is_open: true # folder expanded in sidebar
+group: 'Section Name' # sidebar section label
+version: '2.0.0' # ROOT index only
 ```
+
+## Component Rules
+
+- **Never modify** `components/ui/*` (shadcn/ui primitives)
+- **Create custom components** in `components/` root
+- **Always use** `@/` imports, never relative
+- **Document** new components in `docs/shadcn-ui/`
 
 ## Commands
 
-| Command           | Purpose                                 |
-| ----------------- | --------------------------------------- |
-| `npm run dev`     | Start dev server (Turbopack)            |
-| `npm run build`   | Production build (validates TypeScript) |
-| `npm run lint`    | ESLint check                            |
-| `npm run format`  | Prettier format                         |
-| `npm run prepare` | Install git hooks (Lefthook)            |
+| Command          | Purpose                |
+| ---------------- | ---------------------- |
+| `npm run dev`    | Dev server (Turbopack) |
+| `npm run build`  | Production build       |
+| `npm run lint`   | ESLint                 |
+| `npm run format` | Prettier               |
 
-## Common Patterns & Fixes
+## Common Patterns
 
-### Server-only error
+### Adding locale prefix to URLs
 
+```typescript
+// In server component
+const localePrefix = locale ? `/${locale}` : '';
+const url = `${localePrefix}/docs/${version}/${slug}`;
 ```
-Module not found: 'fs'
-```
 
-**Fix**: Move logic to Server Component, pass data as props to client.
-
-### Type errors on page.data
+### Type assertions for page data
 
 ```typescript
 const data = page.data as unknown as CustomPageData;
 ```
 
-### Sidebar not updating
+### Creating new content
 
-Check `order` field in frontmatter; verify `sortPageTree` receives correct version.
-
-### Search not filtering versions
-
-Ensure URL format matches `/docs/{version}/...` in filter logic.
-
-### Lint: setState in useEffect
-
-Use `useSyncExternalStore` instead of `useState` + `useEffect` with setState.
-
-## Adding a New Version
-
-1. Create folder: `content/docs/v2/`
-2. Add `index.mdx` with `version: "2.0.0"` frontmatter
-3. Copy/create pages in the new folder
-4. Versions are auto-discovered - no code changes needed
-
-## CI Workflow
-
-`.github/workflows/ci.yml` runs:
-
-1. `npm ci`
-2. `npm run build`
-3. `npm run lint`
-4. `npx prettier --check .`
+1. Create MDX in `content/docs/{locale}/{version}/`
+2. Match structure across locales (en + pt)
+3. Use correct language in content body
 
 ## PR Checklist
 
 - [ ] `npm run build` passes
-- [ ] `npm run lint` has no errors
-- [ ] New components documented in `docs/shadcn-ui/`
+- [ ] `npm run lint` clean
+- [ ] Content exists in all locales
 - [ ] Server/client boundary respected
-- [ ] Version-aware if touching docs routes
-
-## Releases
-
-Automated via `semantic-release` in `.github/workflows/release.yml`. Uses semantic commit messages for versioning.
+- [ ] No modifications to `components/ui/`
